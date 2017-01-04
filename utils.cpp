@@ -68,14 +68,14 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 		{"e", { "2", "0", "1" }},
 		{"F", { "2", "0", "1", "3" }},
 		{"G", { "2", "0", "1" }},
-		{"i", { "1", "0" }},
+		{"i", { "0", "1" }},
 		{"m", { "0", "1" }},
 		{"o", { "hoa", "dot" }},
 		{"p", { "2", "1", "3" }},
 		{"s", { "1", "0" }},
 		{"t", { "1", "0" }},
 		{"u", { "1", "0" }},
-		{"X", { "1", "0" }},
+		{"X", { "0", "1" }},
 		{"z", { "1", "0" }},
 	};
 
@@ -118,16 +118,22 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 	// simulating LTL3BA means -u0
 	if (result.count("a") > 0) {
 		std::set<std::string> params_default_null;
+		std::set<std::string> params_default_true;
 
 		if (result["a"] == "2") {
-			params_default_null = { "d", "i", "u", "X" };
+			params_default_null = { "d", "u" };
 			allowed_values["e"] = { "1", "0", "2" };
 		} else if (result["a"] == "3") {
 			params_default_null = { "u" };
+			params_default_true = { "i", "X" };
 		}
 
 		for (auto param : params_default_null) {
 			allowed_values[param] = { "0", "1" };
+		}
+
+		for (auto param : params_default_true) {
+			allowed_values[param] = { "1", "0" };
 		}
 	}
 

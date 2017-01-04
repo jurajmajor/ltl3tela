@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 			<< "\t\t1\tmerge Gf if f is temporal formula\n"
 			<< "\t\t2\tmerge Gf is f is conjunction of temporal formulae (default)\n"
 			<< "\t-h, -?\tprint this help\n"
-			<< "\t-i[0|1]\tproduce SLAA with one initial state (default on)\n"
+			<< "\t-i[0|1]\tproduce SLAA with one initial state (default off)\n"
 			<< "\t-m[0|1]\tcheck formula for containment of some alpha-mergeable U (default off)\n"
 			<< "\t-o [hoa|dot]\ttype of output\n"
 			<< "\t\thoa\tprint automaton in HOA format (default)\n"
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
 			<< "\t-s[0|1]\tspot's formula simplifications (default on)\n"
 			<< "\t-t[0|1]\timproved construction of acceptance condition (default on)\n"
 			<< "\t-u[0|1]\tsimulation of nondeterministic automaton (default on)\n"
-			<< "\t-X[0|1]\ttranslate X phi as (X phi) --tt--> (phi) (default on)\n"
+			<< "\t-X[0|1]\ttranslate X phi as (X phi) --tt--> (phi) (default off)\n"
 			<< "\t-z[0|1]\tcall scc_filter on nondeterministic automaton (default on)\n";
 
 		return invalid_run;
