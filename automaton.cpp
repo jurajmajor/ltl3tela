@@ -87,6 +87,10 @@ template<typename T> unsigned Automaton<T>::create_edge(bdd label) {
 }
 
 template<typename T> void Automaton<T>::add_edge(unsigned from, bdd label, std::set<unsigned> to, std::set<spot::acc_cond::mark_t::value_t> marks) {
+	if (label == bddfalse) {
+		return;
+	}
+
 	unsigned edge_id = create_edge(label);
 
 	Edge* e_this = get_edge(edge_id);
