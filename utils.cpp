@@ -91,7 +91,7 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 				}
 
 				// pad flags with no value
-				if (last_arg_name == "h") {
+				if (last_arg_name == "h" || last_arg_name == "v") {
 					last_arg_name += "1";
 				}
 

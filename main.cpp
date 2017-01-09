@@ -51,10 +51,15 @@ int main(int argc, char* argv[])
 
 	std::map<std::string, std::string> args = parse_arguments(argc, argv);
 
+	if (args.count("v") > 0) {
+		std::cout << "LTL3HOA " << version << "\n";
+		return 0;
+	}
+
 	bool invalid_run = args.count("f") == 0;
 
 	if (invalid_run || args.count("h") > 0) {
-		std::cerr << "LTL3HOA " << version << "\n\n"
+		std::cout << "LTL3HOA " << version << "\n\n"
 			<< "usage: " << argv[0] << " [-flags] -f formula\n"
 			<< "available flags:\n"
 			<< "\t-a[0|2|3]\tact like\n"
@@ -88,6 +93,7 @@ int main(int argc, char* argv[])
 			<< "\t-s[0|1]\tspot's formula simplifications (default on)\n"
 			<< "\t-t[0|1]\timproved construction of acceptance condition (default on)\n"
 			<< "\t-u[0|1]\tsimulation of nondeterministic automaton (default on)\n"
+			<< "\t-v\tprint version and exit\n"
 			<< "\t-X[0|1]\ttranslate X phi as (X phi) --tt--> (phi) (default off)\n"
 			<< "\t-z[0|1]\tcall scc_filter on nondeterministic automaton (default on)\n";
 
