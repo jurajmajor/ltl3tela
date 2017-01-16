@@ -346,7 +346,6 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa) {
 	} else {
 		// older versions of spot remove the state names after scc_filter calls
 		// hence we add a possibility not to call scc_filter
-		aut->purge_unreachable_states();
 		aut->purge_dead_states();
 	}
 
