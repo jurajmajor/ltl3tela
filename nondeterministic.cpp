@@ -64,6 +64,9 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa) {
 	spot::twa_graph_ptr aut = make_twa_graph(dict);
 	// copy the APs from SLAA
 	aut->copy_ap_of(slaa->spot_aut);
+	// set the name of automaton
+	spot::tl_simplifier simp;
+	aut->set_named_prop("automaton-name", new std::string(str_psl(spot::unabbreviate(simp.simplify(slaa->get_input_formula()), "WM"))));
 
 	// create a map of names
 	auto sets = new std::vector<std::set<unsigned>>;

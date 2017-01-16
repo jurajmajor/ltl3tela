@@ -185,6 +185,9 @@ public:
 	spot::twa_graph_ptr spot_aut;
 	spot::bdd_dict_ptr spot_bdd_dict;
 
+	// getter for the input formula
+	spot::formula get_input_formula() const;
+
 	// acceptance formula of each Until state
 	std::map<spot::formula, acc_phi> acc;
 

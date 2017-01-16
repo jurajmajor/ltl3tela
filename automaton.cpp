@@ -306,6 +306,10 @@ void SLAA::build_acc() {
 	}
 }
 
+spot::formula SLAA::get_input_formula() const {
+	return phi;
+}
+
 template<typename T> void Automaton<T>::remove_unreachable_states() {
 	std::map<unsigned, unsigned> conversion_table;
 	std::queue<unsigned> bfs_queue;

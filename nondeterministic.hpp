@@ -19,6 +19,7 @@
 
 #ifndef NONDETERMINISTIC_H
 #define NONDETERMINISTIC_H
+#include <spot/tl/print.hh>
 #include <spot/twaalgos/cleanacc.hh>
 #include <spot/twaalgos/hoa.hh>
 #include <spot/twaalgos/postproc.hh>
