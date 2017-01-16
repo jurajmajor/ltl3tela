@@ -102,11 +102,15 @@ int main(int argc, char* argv[])
 		return invalid_run;
 	}
 
-	spot::formula f = spot::negative_normal_form(
-		spot::unabbreviate(
-			spot::parse_formula(args["f"])
-		)
-	);
+	spot::formula f;
+	try {
+		f = spot::parse_formula(args["f"]);
+	} catch (spot::parse_error& e) {
+		std::cerr << "The input formula is invalid.\n" << e.what();
+		return 1;
+	}
+
+	f = spot::negative_normal_form(spot::unabbreviate(f));
 
 	if (args["s"] == "1") {
 		spot::tl_simplifier tl_simplif;
