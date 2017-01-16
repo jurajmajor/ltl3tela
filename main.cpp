@@ -48,6 +48,8 @@ int main(int argc, char* argv[])
 	std::string version("1.0.0");
 
 	bdd_init(1000, 1000);
+	// hide "garbage collection" messages from BuDDy
+	bdd_gbc_hook(nullptr);
 
 	std::map<std::string, std::string> args = parse_arguments(argc, argv);
 
