@@ -7,7 +7,7 @@ Requirements
 ============
 
 The Spot library <https://spot.lrde.epita.fr/> has to be installed. Version
-2.0 or higher is required for LTL3HOA to compile and work properly.
+2.4 or higher is required for LTL3HOA to compile and work properly.
 
 Installation
 ============
