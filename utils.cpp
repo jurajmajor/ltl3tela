@@ -70,6 +70,7 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 		{"G", { "2", "0", "1" }},
 		{"i", { "0", "1" }},
 		{"m", { "0", "1" }},
+		{"n", { "1", "0" }},
 		{"o", { "hoa", "dot" }},
 		{"p", { "2", "1", "3" }},
 		{"s", { "1", "0" }},
@@ -114,17 +115,17 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 		result.clear();
 	}
 
-	// simulation of LTL2BA means default values -d0 -i0 -u0 -X0
-	// simulating LTL3BA means -u0
+	// simulation of LTL2BA means default values -d0 -u0 -X0 -n0
+	// simulating LTL3BA means -u0 -i1 -X1 -n1
 	if (result.count("a") > 0) {
 		std::set<std::string> params_default_null;
 		std::set<std::string> params_default_true;
 
 		if (result["a"] == "2") {
-			params_default_null = { "d", "u" };
+			params_default_null = { "d", "u", "n" };
 			allowed_values["e"] = { "1", "0", "2" };
 		} else if (result["a"] == "3") {
-			params_default_null = { "u" };
+			params_default_null = { "u", "n" };
 			params_default_true = { "i", "X" };
 		}
 

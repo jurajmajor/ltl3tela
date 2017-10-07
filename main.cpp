@@ -24,6 +24,8 @@
 #include <spot/tl/nenoform.hh>
 #include <spot/tl/simplify.hh>
 #include <spot/twaalgos/dot.hh>
+#include <spot/twaalgos/dualize.hh>
+#include <spot/twaalgos/isdet.hh>
 #include <spot/twa/twagraph.hh>
 #include <string>
 #include "utils.hpp"
@@ -85,6 +87,7 @@ int main(int argc, char* argv[])
 			<< "\t-h, -?\tprint this help\n"
 			<< "\t-i[0|1]\tproduce SLAA with one initial state (default off)\n"
 			<< "\t-m[0|1]\tcheck formula for containment of some alpha-mergeable U (default off)\n"
+			<< "\t-n[0|1]\ttry translating !f and complementing the automaton (default off)\n"
 			<< "\t-o [hoa|dot]\ttype of output\n"
 			<< "\t\thoa\tprint automaton in HOA format (default)\n"
 			<< "\t\tdot\tprint dot format\n"
@@ -110,15 +113,6 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	f = spot::negative_normal_form(spot::unabbreviate(f));
-
-	if (args["s"] == "1") {
-		spot::tl_simplifier tl_simplif;
-		f = tl_simplif.simplify(f);
-	}
-
-	f = spot::unabbreviate(f);
-
 	o_single_init_state = std::stoi(args["i"]);
 	o_slaa_determ = std::stoi(args["d"]);
 	o_eq_level = std::stoi(args["e"]);
@@ -132,37 +126,73 @@ int main(int argc, char* argv[])
 	o_x_single_succ = std::stoi(args["X"]);
 
 	unsigned int print_phase = std::stoi(args["p"]);
+	unsigned int try_negation = std::stoi(args["n"]);
 
-	auto slaa = make_alternating(f);
+	spot::twa_graph_ptr nwa = nullptr;
 
-	if (o_mergeable_info) {
-		// If some mergeable is present, true is already outputed
-		// from the call of is_mergeable
-		std::cout << false << std::endl;
-		std::exit(0);
-	}
-
-	if (o_spot_scc_filter || print_phase == 2) {
-		slaa->remove_unreachable_states();
-		slaa->remove_unnecessary_marks();
-	}
-
-	if (print_phase & 1) {
-		if (args["o"] == "dot") {
-			slaa->print_dot();
-		} else {
-			slaa->print_hoaf();
+	for (unsigned neg = 0; neg <= try_negation; ++neg) {
+		// neg means we try to negate the formula and complement
+		// the resulting automaton, if it's deterministic
+		// we then choose the smaller of the two automata
+		if (neg) {
+			f = spot::formula::Not(f);
 		}
-	}
 
-	if (print_phase & 2) {
-		if (!o_spot_scc_filter && print_phase != 2) {
+		f = spot::negative_normal_form(spot::unabbreviate(f));
+
+		if (args["s"] == "1") {
+			spot::tl_simplifier tl_simplif;
+			f = tl_simplif.simplify(f);
+		}
+
+		f = spot::unabbreviate(f);
+
+		auto slaa = make_alternating(f);
+
+		if (o_mergeable_info) {
+			// If some mergeable is present, true is already outputed
+			// from the call of is_mergeable
+			std::cout << false << std::endl;
+			std::exit(0);
+		}
+
+		if (o_spot_scc_filter || print_phase == 2) {
 			slaa->remove_unreachable_states();
 			slaa->remove_unnecessary_marks();
 		}
 
-		auto nwa = make_nondeterministic(slaa);
+		if (print_phase & 1) {
+			if (args["o"] == "dot") {
+				slaa->print_dot();
+			} else {
+				slaa->print_hoaf();
+			}
+		}
 
+		if (print_phase & 2) {
+			if (!o_spot_scc_filter && print_phase != 2) {
+				slaa->remove_unreachable_states();
+				slaa->remove_unnecessary_marks();
+			}
+
+			auto nwa_temp = make_nondeterministic(slaa);
+			if (!neg) {
+				// always assign the default value
+				nwa = nwa_temp;
+			} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
+				nwa_temp = spot::dualize(nwa_temp);
+
+				if (nwa->num_states() > nwa_temp->num_states()) {
+					nwa = nwa_temp;
+				}
+			}
+		}
+
+		delete slaa;
+
+	}
+
+	if (print_phase & 2) {
 		if (args["o"] == "dot") {
 			spot::print_dot(std::cout, nwa);
 		} else {
@@ -170,8 +200,6 @@ int main(int argc, char* argv[])
 			std::cout << '\n';
 		}
 	}
-
-	delete slaa;
 
 	// do not call bdd_done(), we use libbddx
 
