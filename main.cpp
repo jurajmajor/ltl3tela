@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 			<< "\t-h, -?\tprint this help\n"
 			<< "\t-i[0|1]\tproduce SLAA with one initial state (default off)\n"
 			<< "\t-m[0|1]\tcheck formula for containment of some alpha-mergeable U (default off)\n"
-			<< "\t-n[0|1]\ttry translating !f and complementing the automaton (default off)\n"
+			<< "\t-n[0|1]\ttry translating !f and complementing the automaton (default on)\n"
 			<< "\t-o [hoa|dot]\ttype of output\n"
 			<< "\t\thoa\tprint automaton in HOA format (default)\n"
 			<< "\t\tdot\tprint dot format\n"
