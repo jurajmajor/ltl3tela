@@ -1,20 +1,20 @@
 /*
     Copyright (c) 2016 Juraj Major
 
-    This file is part of LTL3HOA.
+    This file is part of LTL3TELA.
 
-    LTL3HOA is free software: you can redistribute it and/or modify
+    LTL3TELA is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    LTL3HOA is distributed in the hope that it will be useful,
+    LTL3TELA is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with LTL3HOA.  If not, see <http://www.gnu.org/licenses/>.
+    along with LTL3TELA.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "automaton.hpp"
@@ -578,7 +578,7 @@ void SLAA::print_hoaf() {
 	spot::tl_simplifier simp;
 
 	std::cout << "HOA: v1\n";
-	std::cout << "tool: \"LTL3HOA\"\n";
+	std::cout << "tool: \"LTL3TELA\"\n";
 	std::cout << "name: \"SLAA for " << spot::unabbreviate(simp.simplify(phi), "WM") << "\"\n";
 	std::cout << "States: " << (sink_state_needed ? state_counter + 1 : state_counter) << '\n'; // + 1 is for sink state
 
