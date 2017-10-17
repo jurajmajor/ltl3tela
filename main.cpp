@@ -161,7 +161,7 @@ int main(int argc, char* argv[])
 			slaa->remove_unnecessary_marks();
 		}
 
-		if (print_phase & 1) {
+		if ((print_phase & 1) && !neg) {
 			if (args["o"] == "dot") {
 				slaa->print_dot();
 			} else {
