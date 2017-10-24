@@ -17,3 +17,9 @@ Usage
 =====
 Use `./ltl3tela -f 'formula to translate'`.
 See `./ltl3tela -h` for more information.
+
+Experimental evaluation
+=======================
+
+Jupyter notebook with the comparison of LTL3TELA and other translators
+can be found in the Experiments/ directory.
