@@ -106,6 +106,7 @@ class LtlcrossRunner(object):
         # Shape the table
         table = res.set_index(['form_id', 'formula', 'tool'])
         table = table.unstack(2)
+        table.axes[1].set_names(['column','tool'],inplace=True)
 
         # Create separate tables for automata
         automata = table[['automaton']]
@@ -120,7 +121,7 @@ class LtlcrossRunner(object):
         # stores the followed columns only
         values = table[self.cols]
         self.form = form
-        self.values = values
+        self.values = values.sort_index(axis=1,level=['column','tool'])
         # self.compute_best("Minimum")
         self.automata = automata
 
@@ -189,7 +190,7 @@ class LtlcrossRunner(object):
         col : String
             One of the followed columns (``states`` default)
         """
-        return self.values[col].sum()
+        return self.values[col].dropna().sum()
 
     def smaller_than(self, tool1, tool2,
                      restrict=True,
