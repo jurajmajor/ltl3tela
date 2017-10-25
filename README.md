@@ -21,5 +21,24 @@ See `./ltl3tela -h` for more information.
 Experimental evaluation
 =======================
 
-Jupyter notebook with the comparison of LTL3TELA and other translators
-can be found in the Experiments/ directory.
+The translation used in LTL3TELA was submitted for presentation of the
+[TACAS'18](http://www.etaps.org/index.php/2018/tacas) conference. 
+Jupyter notebook [Experiments/Evaluation.ipynb](Experiments/Evaluation.ipynb)
+contains scripts and other data used for evaluation of the translations
+presented there. In particular:
+1. evaluation of impact of $\mathsf{F}$- and $\mathsf{F,G}$-merging on the size
+  of produced automata, and
+2. comparison of LTL3TELA to LTL3BA and SPOT,
+
+on a benchmark of 500 LTL($\mathsf{F}$,$\mathsf{G}$) formulae.
+
+### Requirements
+
+If you would like to run the notebook by yourself, you need to have the 
+folowing tools installed in `PATH` on your system.
+
+* [SPOT](https://spot.lrde.epita.fr/) v. 2.4+ with Python bindings
+* [Pandas](http://pandas.pydata.org/) Python library v. 20.3+
+* [Jupyter](http://jupyter.org/) notebook v 5.0+
+* [LTL3TELA](https://github.com/jurajmajor/ltl3tela) v 1.1
+* [LTL3BA](https://sourceforge.net/projects/ltl3ba/) v. 1.1.3+
