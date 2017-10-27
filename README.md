@@ -23,7 +23,7 @@ Experimental evaluation
 
 The translation used in LTL3TELA was submitted for presentation of the
 [TACAS'18](http://www.etaps.org/index.php/2018/tacas) conference. 
-Jupyter notebook [Experiments/Evaluation.ipynb](Experiments/Evaluation.ipynb)
+Jupyter notebook [Evaluation_TACAS18](Evaluation_TACAS18.ipynb)
 contains scripts and other data used for evaluation of the translations
 presented there. In particular:
 1. evaluation of impact of $\mathsf{F}$- and $\mathsf{F,G}$-merging on the size
@@ -31,6 +31,12 @@ presented there. In particular:
 2. comparison of LTL3TELA to LTL3BA and SPOT,
 
 on a benchmark of 500 LTL($\mathsf{F}$,$\mathsf{G}$) formulae.
+
+The original evaluation contained a typo in LTL3TELA settings - the Spot's 
+reductions were disabled by accident. To see the evaluation where these are
+enabled (as claimed in the paper), see 
+[Evaluation_TACAS18_corrected](Evaluation_TACAS18_corrected.ipynb). The
+results are even better for LTL3TELA.
 
 ### Requirements
 
