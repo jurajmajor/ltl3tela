@@ -1,0 +1,5 @@
+ltl3tela
+__pycache__/
+.ipynb_checkpoints/
+Experiments/*.csv
+Experiments/*.tex
