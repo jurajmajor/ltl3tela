@@ -181,11 +181,11 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa) {
 	auto state_sets = aut->get_named_prop<std::vector<std::set<unsigned>>>("state-sets");
 	auto sn = new std::vector<std::string>(state_sets->size() + (spot_init_state_id > 0 ? 1 : 0));
 
-	for (unsigned i = 0; i < state_sets->size(); ++i) {
-		std::set<unsigned> ss = (*state_sets)[i];
+	for (unsigned i = 0; i < sn->size(); ++i) {
 		if (spot_init_state_id > 0 && i == spot_init_state_id) {
 			(*sn)[i] = "init";
 		} else {
+			std::set<unsigned> ss = (*state_sets)[i];
 			(*sn)[i] = set_to_str(ss);
 		}
 	}
@@ -329,7 +329,6 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa) {
 			auto target_id = nha->state_name(*(edge->get_targets().begin()));
 			auto label = edge->get_label();
 			auto marks = edge->get_marks();
-			auto target_set = (*sets)[target_id];
 
 			std::set<spot::acc_cond::mark_t::value_t> marks_relabelled;
 			for (auto mark : marks) {
