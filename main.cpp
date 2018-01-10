@@ -47,7 +47,7 @@ bool o_x_single_succ;		// -X
 
 int main(int argc, char* argv[])
 {
-	std::string version("1.1.0");
+	std::string version("1.1.1");
 
 	bdd_init(1000, 1000);
 	// hide "garbage collection" messages from BuDDy
