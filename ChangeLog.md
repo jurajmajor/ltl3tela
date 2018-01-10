@@ -1,3 +1,7 @@
+## [1.1.1] - 2018-01-10
+* FIX: segafault when a fresh initial state is created
+* If more than 32 acceptance sets are used (limitation of Spot) exit with return code `32` instead of segfault
+
 ## [1.1.0] - 2017-10-20
 * The tool is now named LTL3TELA
 * LTL3TELA now also translates the negation of formula; if the resulting automaton is deterministic and smaller than the original automaton, its complement is used as an output
