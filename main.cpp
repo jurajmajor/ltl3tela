@@ -68,8 +68,8 @@ int main(int argc, char* argv[])
 			<< "available flags:\n"
 			<< "\t-a[0|2|3]\tact like\n"
 			<< "\t\t0\tdo not simulate anything (default)\n"
-			<< "\t\t2\tltl2ba (like -d0 -u0 -n0 -e1)\n"
-			<< "\t\t3\tltl3ba (like -u0 -n0 -i1 -X1)\n"
+			<< "\t\t2\tltl2ba\n"
+			<< "\t\t3\tltl3ba\n"
 			<< "\t-d[0|1]\tmore deterministic SLAA construction (default on)\n"
 			<< "\t-e[0|1|2]\tequivalence check on NA\n"
 			<< "\t\t0\tno check\n"
@@ -130,66 +130,74 @@ int main(int argc, char* argv[])
 
 	spot::twa_graph_ptr nwa = nullptr;
 
-	for (unsigned neg = 0; neg <= try_negation; ++neg) {
-		// neg means we try to negate the formula and complement
-		// the resulting automaton, if it's deterministic
-		// we then choose the smaller of the two automata
-		if (neg) {
-			f = spot::formula::Not(f);
-		}
-
-		f = spot::negative_normal_form(spot::unabbreviate(f));
-
-		if (args["s"] == "1") {
-			spot::tl_simplifier tl_simplif;
-			f = tl_simplif.simplify(f);
-		}
-
-		f = spot::unabbreviate(f);
-
-		auto slaa = make_alternating(f);
-
-		if (o_mergeable_info) {
-			// If some mergeable is present, true is already outputed
-			// from the call of is_mergeable
-			std::cout << false << std::endl;
-			std::exit(0);
-		}
-
-		if (o_spot_scc_filter || print_phase == 2) {
-			slaa->remove_unreachable_states();
-			slaa->remove_unnecessary_marks();
-		}
-
-		if ((print_phase & 1) && !neg) {
-			if (args["o"] == "dot") {
-				slaa->print_dot();
-			} else {
-				slaa->print_hoaf();
+	try {
+		for (unsigned neg = 0; neg <= try_negation; ++neg) {
+			// neg means we try to negate the formula and complement
+			// the resulting automaton, if it's deterministic
+			// we then choose the smaller of the two automata
+			if (neg) {
+				f = spot::formula::Not(f);
 			}
-		}
 
-		if (print_phase & 2) {
-			if (!o_spot_scc_filter && print_phase != 2) {
+			f = spot::negative_normal_form(spot::unabbreviate(f));
+
+			if (args["s"] == "1") {
+				spot::tl_simplifier tl_simplif;
+				f = tl_simplif.simplify(f);
+			}
+
+			f = spot::unabbreviate(f);
+
+			auto slaa = make_alternating(f);
+
+			if (o_mergeable_info) {
+				// If some mergeable is present, true is already outputed
+				// from the call of is_mergeable
+				std::cout << false << std::endl;
+				std::exit(0);
+			}
+
+			if (o_spot_scc_filter || print_phase == 2) {
 				slaa->remove_unreachable_states();
 				slaa->remove_unnecessary_marks();
 			}
 
-			auto nwa_temp = make_nondeterministic(slaa);
-			if (!neg) {
-				// always assign the default value
-				nwa = nwa_temp;
-			} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
-				nwa_temp = spot::dualize(nwa_temp);
-
-				if (nwa->num_states() > nwa_temp->num_states()) {
-					nwa = nwa_temp;
+			if ((print_phase & 1) && !neg) {
+				if (args["o"] == "dot") {
+					slaa->print_dot();
+				} else {
+					slaa->print_hoaf();
 				}
 			}
+
+			if (print_phase & 2) {
+				if (!o_spot_scc_filter && print_phase != 2) {
+					slaa->remove_unreachable_states();
+					slaa->remove_unnecessary_marks();
+				}
+
+				auto nwa_temp = make_nondeterministic(slaa);
+				if (!neg) {
+					// always assign the default value
+					nwa = nwa_temp;
+				} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
+					nwa_temp = spot::dualize(nwa_temp);
+
+					if (nwa->num_states() > nwa_temp->num_states()) {
+						nwa = nwa_temp;
+					}
+				}
+			}
+
+			delete slaa;
 		}
+	} catch (std::runtime_error& e) {
+		std::string what(e.what());
 
-		delete slaa;
-
+		if (what == "Too many acceptance sets used.") {
+			std::cerr << "LTL3TELA is unable to set more than 32 acceptance marks.\n";
+			return 32;
+		}
 	}
 
 	if (print_phase & 2) {
