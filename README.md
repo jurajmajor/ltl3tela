@@ -22,8 +22,8 @@ Experimental evaluation
 =======================
 
 The translation used in LTL3TELA was submitted for presentation of the
-[TACAS'18](http://www.etaps.org/index.php/2018/tacas) conference.
-Jupyter notebook [Evaluation_TACAS18](Experiments/Evaluation_TACAS18.ipynb)
+[ATVA'18](http://atva-conference.org/) conference.
+Jupyter notebook [Evaluation_ATVA18](Experiments/Evaluation_ATVA18.ipynb)
 contains scripts and other data used for evaluation of the translations
 presented there. In particular:
 1. evaluation of impact of $\mathsf{F}$- and $\mathsf{F,G}$-merging on the size
@@ -32,21 +32,15 @@ presented there. In particular:
 
 on a benchmark of 500 LTL($\mathsf{F}$,$\mathsf{G}$) formulae.
 
-The original evaluation contained a typo in LTL3TELA settings - the Spot's
-reductions were disabled by accident. To see the evaluation where these are
-enabled (as claimed in the paper), see
-[Evaluation_TACAS18_corrected](Experiments/Evaluation_TACAS18_corrected.ipynb). The
-results are even better for LTL3TELA.
-
 ### Requirements
 
 If you would like to run the notebook by yourself, you need to have the
 folowing tools installed in `PATH` on your system.
 
-* [SPOT](https://spot.lrde.epita.fr/) v. 2.4+ with Python bindings
+* [SPOT](https://spot.lrde.epita.fr/) v. 2.5.3+ with Python bindings
 * [Pandas](http://pandas.pydata.org/) Python library v. 20.3+
 * [Jupyter](http://jupyter.org/) notebook v 5.0+
-* [LTL3TELA](https://github.com/jurajmajor/ltl3tela) v 1.1
+* [LTL3TELA](https://github.com/jurajmajor/ltl3tela) v 1.1.1
 * [LTL3BA](https://sourceforge.net/projects/ltl3ba/) v. 1.1.3+
 
 Known bugs
