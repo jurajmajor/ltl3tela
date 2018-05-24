@@ -1,3 +1,6 @@
+## [1.1.2] - 2018-05-24
+* Replace incorrect usage of spot::acc_cond::mark_t::value_t with an alias of unsigned.
+
 ## [1.1.1] - 2018-01-10
 * FIX: segafault when a fresh initial state is created
 * If more than 32 acceptance sets are used (limitation of Spot) exit with return code `32` instead of segfault
