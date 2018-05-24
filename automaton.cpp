@@ -86,7 +86,7 @@ template<typename T> unsigned Automaton<T>::create_edge(bdd label) {
 	return edges.size() - 1;
 }
 
-template<typename T> void Automaton<T>::add_edge(unsigned from, bdd label, std::set<unsigned> to, std::set<spot::acc_cond::mark_t::value_t> marks) {
+template<typename T> void Automaton<T>::add_edge(unsigned from, bdd label, std::set<unsigned> to, std::set<acc_mark> marks) {
 	if (label == bddfalse) {
 		return;
 	}
@@ -193,15 +193,15 @@ template<typename T> void Automaton<T>::remove_edge(unsigned state_id, unsigned 
 	state_edges[state_id].erase(edge_id);
 }
 
-template<typename T> std::set<spot::acc_cond::mark_t::value_t> Automaton<T>::get_inf_marks() const {
+template<typename T> std::set<acc_mark> Automaton<T>::get_inf_marks() const {
 	return inf_marks;
 }
 
-template<typename T> void Automaton<T>::remember_inf_mark(spot::acc_cond::mark_t::value_t mark) {
+template<typename T> void Automaton<T>::remember_inf_mark(acc_mark mark) {
 	inf_marks.insert(mark);
 }
 
-template<typename T> void Automaton<T>::remember_inf_mark(std::set<spot::acc_cond::mark_t::value_t> marks) {
+template<typename T> void Automaton<T>::remember_inf_mark(std::set<acc_mark> marks) {
 	inf_marks.insert(marks.begin(), marks.end());
 }
 
@@ -388,10 +388,10 @@ void SLAA::remove_unnecessary_marks() {
 	}
 }
 
-SLAA::ac_representation SLAA::mark_transformation(std::map<spot::acc_cond::mark_t::value_t, unsigned>& tgba_mark_owners) {
+SLAA::ac_representation SLAA::mark_transformation(std::map<acc_mark, unsigned>& tgba_mark_owners) {
 	// get a set of all Inf marks; also remember marks having escaping Inf
-	std::map<spot::acc_cond::mark_t::value_t, bool> inf_marks;
-	std::map<spot::acc_cond::mark_t::value_t, spot::acc_cond::mark_t::value_t> orig_sibling_of;
+	std::map<acc_mark, bool> inf_marks;
+	std::map<acc_mark, acc_mark> orig_sibling_of;
 	for (auto& ac : acc) {
 		if (ac.second.inf != -1U) {
 			inf_marks[ac.second.inf] = true;
@@ -404,18 +404,18 @@ SLAA::ac_representation SLAA::mark_transformation(std::map<spot::acc_cond::mark_
 	}
 
 	// map of escaping marks
-	std::map<spot::acc_cond::mark_t::value_t, spot::acc_cond::mark_t::value_t> sibling_of;
+	std::map<acc_mark, acc_mark> sibling_of;
 
 	// this maps each old mark to map { state => 'new mark for this state' }
-	std::map<spot::acc_cond::mark_t::value_t, std::map<unsigned, spot::acc_cond::mark_t::value_t>> mark_owners;
+	std::map<acc_mark, std::map<unsigned, acc_mark>> mark_owners;
 
 	for (unsigned state_id = 0, states_count = states.size(); state_id < states_count; ++state_id) {
-		std::map<spot::acc_cond::mark_t::value_t, spot::acc_cond::mark_t::value_t> marks_to_escape;
+		std::map<acc_mark, acc_mark> marks_to_escape;
 
 		for (auto& edge_id : state_edges[state_id]) {
 			auto edge = get_edge(edge_id);
 
-			std::set<spot::acc_cond::mark_t::value_t> new_edge_marks;
+			std::set<acc_mark> new_edge_marks;
 			for (auto& mark : edge->get_marks()) {
 
 				// is this the first time we see this mark?
@@ -511,11 +511,11 @@ SLAA::ac_representation SLAA::mark_transformation(std::map<spot::acc_cond::mark_
 	// iterate through original acc_phi structures
 	for (auto& ac : acc) {
 		// these are 2 conjuncts for AC
-		std::set<std::set<std::pair<spot::acc_cond::mark_t::value_t, spot::acc_cond::mark_t::value_t>>> fin_xs_disj;
-		std::set<std::set<std::pair<spot::acc_cond::mark_t::value_t, spot::acc_cond::mark_t::value_t>>> fin_ys_disj;
+		std::set<std::set<std::pair<acc_mark, acc_mark>>> fin_xs_disj;
+		std::set<std::set<std::pair<acc_mark, acc_mark>>> fin_ys_disj;
 
 		// Fin(x) -> (Fin(x_s1) & ... & Fin(x_sn)) plus their escaping Infs
-		std::set<std::pair<spot::acc_cond::mark_t::value_t, spot::acc_cond::mark_t::value_t>> fin_xs;
+		std::set<std::pair<acc_mark, acc_mark>> fin_xs;
 
 		for (auto& state_mark : mark_owners[ac.second.fin]) {
 			fin_xs.insert(std::make_pair(state_mark.second, sibling_of[state_mark.second]));
@@ -528,7 +528,7 @@ SLAA::ac_representation SLAA::mark_transformation(std::map<spot::acc_cond::mark_
 
 		for (auto& y : ac.second.fin_disj) {
 			// Fin(y_i1) & ... & Fin(y_ij)
-			std::set<std::pair<spot::acc_cond::mark_t::value_t, spot::acc_cond::mark_t::value_t>> fin_ys;
+			std::set<std::pair<acc_mark, acc_mark>> fin_ys;
 
 			for (auto& state_mark : mark_owners[y]) {
 				fin_ys.insert(std::make_pair(state_mark.second, sibling_of[state_mark.second]));
@@ -1029,7 +1029,7 @@ std::set<unsigned> Edge::get_marks() const {
 //   else returns 2
 // else returns 0
 // where edge 1 is this edge and edge 2 is the other edge
-int Edge::dominates(Edge* other, std::set<spot::acc_cond::mark_t::value_t> inf_marks) const {
+int Edge::dominates(Edge* other, std::set<acc_mark> inf_marks) const {
 	auto o1 = get_targets();
 	auto j1 = get_marks();
 
@@ -1064,7 +1064,7 @@ int Edge::dominates(Edge* other, std::set<spot::acc_cond::mark_t::value_t> inf_m
 	}
 }
 
-int Edge::dominates(Edge* other, std::set<unsigned> o1, std::set<unsigned> o2, std::set<spot::acc_cond::mark_t::value_t> inf_marks) const {
+int Edge::dominates(Edge* other, std::set<unsigned> o1, std::set<unsigned> o2, std::set<acc_mark> inf_marks) const {
 	// t1 kills t2 if O1 ⊆ O2 & a2 => a1
 	auto j1 = get_marks();
 	auto j2 = other->get_marks();

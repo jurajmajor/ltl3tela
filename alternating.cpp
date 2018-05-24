@@ -161,7 +161,7 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 						// φ is U subformula
 						// copy each edge for φ
 						// each edge that is not a loop gets an Inf mark
-						spot::acc_cond::mark_t::value_t inf = slaa->acc[phi].inf;
+						acc_mark inf = slaa->acc[phi].inf;
 
 						for (auto& edge_id : slaa->get_state_edges(phi_state)) {
 							auto edge = slaa->get_edge(edge_id);
@@ -299,7 +299,7 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 						mark = ac.add_sets(f_dnf_size);
 						// now we have marks in range mark .. mark + f_dnf_size - 1
 						// each set of edges gets all but its number
-						for (spot::acc_cond::mark_t::value_t i = mark; i < mark + f_dnf_size; ++i) {
+						for (acc_mark i = mark; i < mark + f_dnf_size; ++i) {
 							slaa->acc[f].fin_disj.insert(i);
 						}
 					}

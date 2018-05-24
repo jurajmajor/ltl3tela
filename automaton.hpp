@@ -39,13 +39,15 @@
 #include <spot/twaalgos/sccfilter.hh>
 #include "utils.hpp"
 
+typedef unsigned acc_mark;
+
 class Edge {
 protected:
 	// target set of the edge
 	std::set<unsigned> targets;
 
 	// the acceptance label
-	std::set<spot::acc_cond::mark_t::value_t> marks;
+	std::set<acc_mark> marks;
 
 	// the transition labels in BDD
 	bdd label;
@@ -84,8 +86,8 @@ public:
 	// sets the transition label
 	void set_label(bdd l);
 
-	int dominates(Edge* other, std::set<unsigned> o1, std::set<unsigned> o2, std::set<spot::acc_cond::mark_t::value_t> inf_marks) const;
-	int dominates(Edge* other, std::set<spot::acc_cond::mark_t::value_t> inf_marks) const;
+	int dominates(Edge* other, std::set<unsigned> o1, std::set<unsigned> o2, std::set<acc_mark> inf_marks) const;
+	int dominates(Edge* other, std::set<acc_mark> inf_marks) const;
 };
 
 template<typename T> class Automaton {
@@ -102,7 +104,7 @@ protected:
 	std::vector<std::set<unsigned>>* spot_id_to_slaa_set = nullptr; // this has to be nullptr for SLAA
 
 	// a set of Inf-marks used in the automaton
-	std::set<spot::acc_cond::mark_t::value_t> inf_marks;
+	std::set<acc_mark> inf_marks;
 
 	// the set of initial configurations
 	std::set<std::set<unsigned>> init_sets;
@@ -124,7 +126,7 @@ public:
 	unsigned create_edge(bdd label);
 
 	// creates an edge with given source state, labels and target set
-	void add_edge(unsigned from, bdd label, std::set<unsigned> to, std::set<spot::acc_cond::mark_t::value_t> marks = std::set<spot::acc_cond::mark_t::value_t>());
+	void add_edge(unsigned from, bdd label, std::set<unsigned> to, std::set<acc_mark> marks = std::set<acc_mark>());
 
 	// copies the given edge to the source `from'
 	void add_edge(unsigned from, unsigned edge_id);
@@ -142,11 +144,11 @@ public:
 	std::set<unsigned> get_state_edges(unsigned state_id) const;
 
 	// returns the registered Inf-marks
-	std::set<spot::acc_cond::mark_t::value_t> get_inf_marks() const;
+	std::set<acc_mark> get_inf_marks() const;
 
 	// registers the marks in the set `inf_marks'
-	void remember_inf_mark(spot::acc_cond::mark_t::value_t mark);
-	void remember_inf_mark(std::set<spot::acc_cond::mark_t::value_t> marks);
+	void remember_inf_mark(acc_mark mark);
+	void remember_inf_mark(std::set<acc_mark> marks);
 
 	// removes states unreachable from the initial states
 	void remove_unreachable_states();
@@ -173,13 +175,13 @@ public:
 	// the condition changes to (...) | Inf(z)
 	// this z is stored in inf
 	typedef struct {
-		spot::acc_cond::mark_t::value_t fin;
-		spot::acc_cond::mark_t::value_t inf;
-		std::set<spot::acc_cond::mark_t::value_t> fin_disj;
+		acc_mark fin;
+		acc_mark inf;
+		std::set<acc_mark> fin_disj;
 	} acc_phi;
 
 	// the set representation of resultant acceptance condition
-	typedef std::set<std::set<std::set<std::pair<spot::acc_cond::mark_t::value_t, spot::acc_cond::mark_t::value_t>>>> ac_representation;
+	typedef std::set<std::set<std::set<std::pair<acc_mark, acc_mark>>>> ac_representation;
 
 	// Spot structures
 	spot::twa_graph_ptr spot_aut;
@@ -206,7 +208,7 @@ public:
 	// converts the automaton to single-owner
 	// the output argument tgba_mark_owners contains pairs of mark j and its owner q
 	// such that all loops over q contain j as the only mark
-	ac_representation mark_transformation(std::map<spot::acc_cond::mark_t::value_t, unsigned>& tgba_mark_owners);
+	ac_representation mark_transformation(std::map<acc_mark, unsigned>& tgba_mark_owners);
 
 	// prints the automaton in HOA format
 	void print_hoaf();
