@@ -1,3 +1,8 @@
+## [1.2.0] - 2018-07-07
+* LTL3TELA now tries to translate the formula with Spot and outputs the smaller automaton.
+* When both the original automaton and the complemented automaton for !f have the same number of states, the latter is preferred. This should produce deterministic automata in more cases.
+* -v now outputs the used version of Spot.
+
 ## [1.1.2] - 2018-05-24
 * Replace incorrect usage of spot::acc_cond::mark_t::value_t with an alias of unsigned.
 
