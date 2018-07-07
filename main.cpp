@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
 				} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
 					nwa_temp = spot::dualize(nwa_temp);
 
-					if (nwa->num_states() > nwa_temp->num_states()) {
+					if (nwa->num_states() >= nwa_temp->num_states()) {
 						nwa = nwa_temp;
 					}
 				}
