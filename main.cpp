@@ -26,6 +26,7 @@
 #include <spot/twaalgos/dot.hh>
 #include <spot/twaalgos/dualize.hh>
 #include <spot/twaalgos/isdet.hh>
+#include <spot/twaalgos/translate.hh>
 #include <spot/twa/twagraph.hh>
 #include <string>
 #include "utils.hpp"
@@ -33,6 +34,7 @@
 #include "nondeterministic.hpp"
 #include "automaton.hpp"
 
+bool o_try_ltl2tgba;		// -b
 bool o_single_init_state;	// -i
 bool o_slaa_determ;			// -d
 unsigned o_eq_level;		// -e
@@ -70,6 +72,7 @@ int main(int argc, char* argv[])
 			<< "\t\t0\tdo not simulate anything (default)\n"
 			<< "\t\t2\tltl2ba (like -d0 -u0 -n0 -e1)\n"
 			<< "\t\t3\tltl3ba (like -u0 -n0 -i1 -X1)\n"
+			<< "\t-b[0|1]\ttry ltl2tgba if it produces smaller automaton (default on)\n"
 			<< "\t-d[0|1]\tmore deterministic SLAA construction (default on)\n"
 			<< "\t-e[0|1|2]\tequivalence check on NA\n"
 			<< "\t\t0\tno check\n"
@@ -113,6 +116,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
+	o_try_ltl2tgba = std::stoi(args["b"]);
 	o_single_init_state = std::stoi(args["i"]);
 	o_slaa_determ = std::stoi(args["d"]);
 	o_eq_level = std::stoi(args["e"]);
@@ -189,6 +193,13 @@ int main(int argc, char* argv[])
 				}
 			}
 
+			if (neg) {
+				// we have negated the formula so let's
+				// negate it once again so that we give
+				// ltl2tgba the original formula
+				f = spot::formula::Not(f);
+			}
+
 			delete slaa;
 		}
 	} catch (std::runtime_error& e) {
@@ -197,6 +208,15 @@ int main(int argc, char* argv[])
 		if (what == "Too many acceptance sets used.") {
 			std::cerr << "LTL3TELA is unable to set more than 32 acceptance marks.\n";
 			return 32;
+		}
+	}
+
+	if (o_try_ltl2tgba) {
+		spot::translator ltl2tgba;
+		auto nwa_spot = ltl2tgba.run(f);
+
+		if (nwa_spot->num_states() < nwa->num_states()) {
+			nwa = nwa_spot;
 		}
 	}
 
