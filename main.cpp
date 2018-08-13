@@ -212,16 +212,16 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if (o_try_ltl2tgba) {
-		spot::translator ltl2tgba;
-		auto nwa_spot = ltl2tgba.run(f);
-
-		if (nwa_spot->num_states() < nwa->num_states()) {
-			nwa = nwa_spot;
-		}
-	}
-
 	if (print_phase & 2) {
+		if (o_try_ltl2tgba) {
+			spot::translator ltl2tgba;
+			auto nwa_spot = ltl2tgba.run(f);
+
+			if (nwa_spot->num_states() < nwa->num_states()) {
+				nwa = nwa_spot;
+			}
+		}
+
 		if (args["o"] == "dot") {
 			spot::print_dot(std::cout, nwa);
 		} else {
