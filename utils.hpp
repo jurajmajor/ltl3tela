@@ -33,7 +33,7 @@
 extern bool o_single_init_state;	// -i
 extern bool o_slaa_determ;			// -d
 extern unsigned o_eq_level;			// -e
-extern bool o_mergeable_info;		// -m
+extern unsigned o_mergeable_info;	// -m
 extern bool o_ac_filter_fin;		// -t
 extern bool o_spot_simulation;		// -u
 extern bool o_spot_scc_filter;		// -z

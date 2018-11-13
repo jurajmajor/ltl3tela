@@ -39,7 +39,7 @@ bool o_try_ltl2tgba;		// -b
 bool o_single_init_state;	// -i
 bool o_slaa_determ;			// -d
 unsigned o_eq_level;		// -e
-bool o_mergeable_info;		// -m
+unsigned o_mergeable_info;	// -m
 bool o_ac_filter_fin;		// -t
 bool o_spot_simulation;		// -u
 bool o_spot_scc_filter;		// -z
@@ -90,7 +90,10 @@ int main(int argc, char* argv[])
 			<< "\t\t2\tmerge Gf is f is conjunction of temporal formulae (default)\n"
 			<< "\t-h, -?\tprint this help\n"
 			<< "\t-i[0|1]\tproduce SLAA with one initial state (default off)\n"
-			<< "\t-m[0|1]\tcheck formula for containment of some alpha-mergeable U (default off)\n"
+			<< "\t-m\t(for experiments only) check formula for containment of\n"
+			<< "\t\t0\tnothing, translate formula as usual (default)\n"
+			<< "\t\t1\tmergeable F\n"
+			<< "\t\t2\tmergeable G\n"
 			<< "\t-n[0|1]\ttry translating !f and complementing the automaton (default on)\n"
 			<< "\t-o [hoa|dot]\ttype of output\n"
 			<< "\t\thoa\tprint automaton in HOA format (default)\n"
@@ -157,7 +160,7 @@ int main(int argc, char* argv[])
 
 			if (o_mergeable_info) {
 				// If some mergeable is present, true is already outputed
-				// from the call of is_mergeable
+				// from the call of is_mergeable or make_alternating_recursive
 				std::cout << false << std::endl;
 				std::exit(0);
 			}

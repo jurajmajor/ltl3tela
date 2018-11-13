@@ -63,7 +63,7 @@ bool is_mergeable(SLAA* slaa, spot::formula f) {
 		}
 	}
 
-	if (o_mergeable_info && at_least_one_loop) {
+	if (o_mergeable_info == 1 && at_least_one_loop) {
 		// only for experiments purposes
 		std::cout << true << std::endl;
 		std::exit(0);
@@ -149,6 +149,12 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 			auto f1_dnf = f_bar(f[1]);
 			if (o_g_merge_level > 0 && f[0].is_ff() && f1_dnf.size() == 1 && (o_g_merge_level == 2 || f1_dnf.begin()->size() == 1)) {
 				// we have G(φ_1 & ... & φ_n) for temporal formulae φ_i
+				if (o_mergeable_info == 2) {
+					// only for experiments purposes
+					std::cout << true << std::endl;
+					std::exit(0);
+				}
+
 				auto f1_conjuncts = *(f1_dnf.begin());
 
 				std::set<std::set<unsigned>> edges_for_product;
