@@ -1,3 +1,8 @@
+## [1.2.1] - 2018-11-13
+
+* Fixed segfault with -p1.
+* Support for -m2 (detection of mergeable G for experimental purposes) added.
+
 ## [1.2.0] - 2018-07-07
 * LTL3TELA now tries to translate the formula with Spot and outputs the smaller automaton.
 * When both the original automaton and the complemented automaton for !f have the same number of states, the latter is preferred. This should produce deterministic automata in more cases.
