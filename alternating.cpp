@@ -149,11 +149,6 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 			auto f1_dnf = f_bar(f[1]);
 			if (o_g_merge_level > 0 && f[0].is_ff() && f1_dnf.size() == 1 && (o_g_merge_level == 2 || f1_dnf.begin()->size() == 1)) {
 				// we have G(φ_1 & ... & φ_n) for temporal formulae φ_i
-				if (o_mergeable_info == 2) {
-					// only for experiments purposes
-					std::cout << true << std::endl;
-					std::exit(0);
-				}
 
 				auto f1_conjuncts = *(f1_dnf.begin());
 
@@ -177,6 +172,12 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 							if (targets.count(phi_state) > 0) {
 								// this is a loop
 								targets.erase(phi_state);
+
+								if (o_mergeable_info == 2) {
+									// only for experiments purposes
+									std::cout << true << std::endl;
+									std::exit(0);
+								}
 							} else {
 								// this is not a loop, add the Inf mark
 								if (inf == -1U) {
@@ -206,6 +207,12 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 						for (auto& edge_id : slaa->get_state_edges(phi_state)) {
 							auto edge = slaa->get_edge(edge_id);
 							auto targets = edge->get_targets();
+
+							if (o_mergeable_info == 2 && targets.count(phi_state) > 0) {
+								// only for experiments purposes
+								std::cout << true << std::endl;
+								std::exit(0);
+							}
 
 							targets.erase(phi_state);
 							targets.insert(state_id);
