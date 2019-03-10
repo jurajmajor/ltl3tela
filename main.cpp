@@ -34,8 +34,9 @@
 #include "alternating.hpp"
 #include "nondeterministic.hpp"
 #include "automaton.hpp"
+#include "spotela.hpp"
 
-bool o_try_ltl2tgba;		// -b
+unsigned o_try_ltl2tgba_spotela;	// -b
 bool o_single_init_state;	// -i
 bool o_slaa_determ;			// -d
 unsigned o_eq_level;		// -e
@@ -73,7 +74,10 @@ int main(int argc, char* argv[])
 			<< "\t\t0\tdo not simulate anything (default)\n"
 			<< "\t\t2\tltl2ba (like -d0 -u0 -n0 -e1)\n"
 			<< "\t\t3\tltl3ba (like -u0 -n0 -i1 -X1)\n"
-			<< "\t-b[0|1]\ttry ltl2tgba if it produces smaller automaton (default on)\n"
+			<< "\t-b[0|1|2]\tproduce TGBA if smaller\n"
+			<< "\t\t0\tno action\n"
+			<< "\t\t1\ttry ltl2tgba\n"
+			<< "\t\t2\ttry ltl2tgba+SPOTELA (default)\n"
 			<< "\t-d[0|1]\tmore deterministic SLAA construction (default on)\n"
 			<< "\t-e[0|1|2]\tequivalence check on NA\n"
 			<< "\t\t0\tno check\n"
@@ -120,7 +124,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	o_try_ltl2tgba = std::stoi(args["b"]);
+	o_try_ltl2tgba_spotela = std::stoi(args["b"]);
 	o_single_init_state = std::stoi(args["i"]);
 	o_slaa_determ = std::stoi(args["d"]);
 	o_eq_level = std::stoi(args["e"]);
@@ -216,9 +220,15 @@ int main(int argc, char* argv[])
 	}
 
 	if (print_phase & 2) {
-		if (o_try_ltl2tgba) {
+		if (o_try_ltl2tgba_spotela) {
 			spot::translator ltl2tgba;
+			spot::postprocessor pp;
 			auto nwa_spot = ltl2tgba.run(f);
+			nwa_spot = pp.run(nwa_spot);
+
+			if (o_try_ltl2tgba_spotela == 2) {
+				nwa_spot = spotela_simplify(nwa_spot);
+			}
 
 			if (nwa_spot->num_states() < nwa->num_states()) {
 				nwa = nwa_spot;
