@@ -29,6 +29,8 @@
 #include <bddx.h>
 #include <spot/tl/parse.hh>
 #include <spot/tl/simplify.hh>
+#include <spot/twa/twagraph.hh>
+#include <spot/twaalgos/isdet.hh>
 
 extern bool o_single_init_state;	// -i
 extern bool o_slaa_determ;			// -d
@@ -47,5 +49,8 @@ std::set<std::set<spot::formula>> f_bar(spot::formula f);
 
 // parses arguments from argv
 std::map<std::string, std::string> parse_arguments(int argc, char* argv[]);
+
+// return the better (smaller, more deterministic) of the two automata
+spot::twa_graph_ptr compare_automata(spot::twa_graph_ptr aut1, spot::twa_graph_ptr aut2);
 
 #endif

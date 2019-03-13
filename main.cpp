@@ -194,10 +194,7 @@ int main(int argc, char* argv[])
 					nwa = nwa_temp;
 				} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
 					nwa_temp = spot::dualize(nwa_temp);
-
-					if (nwa->num_states() >= nwa_temp->num_states()) {
-						nwa = nwa_temp;
-					}
+					nwa = compare_automata(nwa, nwa_temp);
 				}
 			}
 
@@ -230,9 +227,7 @@ int main(int argc, char* argv[])
 				nwa_spot = spotela_simplify(nwa_spot);
 			}
 
-			if (nwa_spot->num_states() < nwa->num_states()) {
-				nwa = nwa_spot;
-			}
+			nwa = compare_automata(nwa, nwa_spot);
 		}
 
 		if (args["o"] == "dot") {

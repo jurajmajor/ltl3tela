@@ -156,3 +156,53 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 
 	return result;
 }
+
+// the comparison now works as follows:
+// 1. return the smaller automaton (wrt. number of states)
+// 2. choose deterministic automaton
+// 3. choose semideterministic automaton
+// 4. choose automaton with smaller number of acc. sets
+// 5. return aut1
+spot::twa_graph_ptr compare_automata(spot::twa_graph_ptr aut1, spot::twa_graph_ptr aut2) {
+	auto ns1 = aut1->num_states();
+	auto ns2 = aut2->num_states();
+
+	if (ns1 < ns2) {
+		return aut1;
+	}
+
+	if (ns2 < ns1) {
+		return aut2;
+	}
+
+	auto det1 = spot::is_universal(aut1);
+	auto det2 = spot::is_universal(aut2);
+
+	if (det1 && !det2) {
+		return aut1;
+	}
+
+	if (det2 && !det1) {
+		return aut2;
+	}
+
+	auto sdet1 = spot::is_semi_deterministic(aut1);
+	auto sdet2 = spot::is_semi_deterministic(aut2);
+
+	if (sdet1 && !sdet2) {
+		return aut1;
+	}
+
+	if (sdet2 && !sdet1) {
+		return aut2;
+	}
+
+	auto as1 = aut1->acc().num_sets();
+	auto as2 = aut2->acc().num_sets();
+
+	if (as2 < as1) {
+		return aut2;
+	}
+
+	return aut1;
+}
