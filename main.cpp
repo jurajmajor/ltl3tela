@@ -74,10 +74,11 @@ int main(int argc, char* argv[])
 			<< "\t\t0\tdo not simulate anything (default)\n"
 			<< "\t\t2\tltl2ba (like -d0 -u0 -n0 -e1)\n"
 			<< "\t\t3\tltl3ba (like -u0 -n0 -i1 -X1)\n"
-			<< "\t-b[0|1|2]\tproduce TGBA if smaller\n"
+			<< "\t-b[0|1|2|3]\tproduce TGBA if smaller\n"
 			<< "\t\t0\tno action\n"
 			<< "\t\t1\ttry ltl2tgba\n"
-			<< "\t\t2\ttry ltl2tgba+SPOTELA (default)\n"
+			<< "\t\t2\ttry SPOTELA\n"
+			<< "\t\t3\ttry ltl2tgba+SPOTELA (default)\n"
 			<< "\t-d[0|1]\tmore deterministic SLAA construction (default on)\n"
 			<< "\t-e[0|1|2]\tequivalence check on NA\n"
 			<< "\t\t0\tno check\n"
@@ -217,17 +218,18 @@ int main(int argc, char* argv[])
 	}
 
 	if (print_phase & 2) {
-		if (o_try_ltl2tgba_spotela) {
+		if (o_try_ltl2tgba_spotela & 1) {
 			spot::translator ltl2tgba;
 			spot::postprocessor pp;
 			auto nwa_spot = ltl2tgba.run(f);
 			nwa_spot = pp.run(nwa_spot);
 
-			if (o_try_ltl2tgba_spotela == 2) {
-				nwa_spot = spotela_simplify(nwa_spot);
-			}
-
 			nwa = compare_automata(nwa, nwa_spot);
+		}
+
+		if (o_try_ltl2tgba_spotela & 2) {
+			auto nwa_spotela = spotela_simplify(nwa);
+			nwa = compare_automata(nwa, nwa_spotela);
 		}
 
 		if (args["o"] == "dot") {
