@@ -53,4 +53,43 @@ std::map<std::string, std::string> parse_arguments(int argc, char* argv[]);
 // return the better (smaller, more deterministic) of the two automata
 spot::twa_graph_ptr compare_automata(spot::twa_graph_ptr aut1, spot::twa_graph_ptr aut2);
 
+template<typename T> class maybe {
+    T val;
+    bool hasVal;
+public:
+    maybe() {
+        hasVal = false;
+    }
+
+    maybe(T v) {
+        val = v;
+        hasVal = true;
+    }
+
+    T fromJust() {
+        if (!hasVal) {
+            throw "Can't call fromJust on Nothing.";
+        }
+        return val;
+    }
+
+    bool isJust() {
+        return hasVal;
+    }
+
+    bool isNothing() {
+        return !hasVal;
+    }
+
+    static maybe<T> nothing() {
+        maybe<T> r;
+        return r;
+    }
+
+    static maybe<T> just(T v) {
+        maybe<T> r(v);
+        return r;
+    }
+};
+
 #endif

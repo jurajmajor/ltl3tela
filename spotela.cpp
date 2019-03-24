@@ -52,7 +52,7 @@ std::vector<edge_t> in_edges(spot::twa_graph_ptr aut, unsigned state1, unsigned 
 	return edges;
 }
 
-std::optional<std::vector<edge_t>> check_out_edges(spot::twa_graph_ptr aut, unsigned state1, unsigned state2) {
+maybe<std::vector<edge_t>> check_out_edges(spot::twa_graph_ptr aut, unsigned state1, unsigned state2) {
 	auto s1_edges = out_edges(aut, state1, state2);
 	auto s2_edges = out_edges(aut, state2, state1);
 
@@ -66,14 +66,14 @@ std::optional<std::vector<edge_t>> check_out_edges(spot::twa_graph_ptr aut, unsi
 		}
 
 		if (!any) {
-			return std::nullopt;
+			return maybe<std::vector<edge_t>>::nothing();
 		}
 	}
 
-	return { s1_edges };
+	return maybe<std::vector<edge_t>>::just(s1_edges);
 }
 
-std::optional<std::vector<edge_t>> check_in_edges(spot::twa_graph_ptr aut, unsigned state1, unsigned state2) {
+maybe<std::vector<edge_t>> check_in_edges(spot::twa_graph_ptr aut, unsigned state1, unsigned state2) {
 	auto s1_edges = in_edges(aut, state1, state2);
 	auto s2_edges = in_edges(aut, state2, state1);
 
@@ -87,11 +87,11 @@ std::optional<std::vector<edge_t>> check_in_edges(spot::twa_graph_ptr aut, unsig
 		}
 
 		if (!any) {
-			return std::nullopt;
+			return maybe<std::vector<edge_t>>::nothing();
 		}
 	}
 
-	return { s1_edges };
+	return maybe<std::vector<edge_t>>::just(s1_edges);
 }
 
 spot::twa_graph_ptr create_aut_from_state(spot::twa_graph_ptr aut, unsigned state) {
@@ -122,17 +122,17 @@ bool has_successors(spot::scc_info si, unsigned scc) {
 	return si.succ(scc).size() > 0;
 }
 
-std::optional<bdd> get_connecting_edge_condition(spot::twa_graph_ptr aut, unsigned state1, unsigned state2, bdd b_loop_cond) {
+maybe<bdd> get_connecting_edge_condition(spot::twa_graph_ptr aut, unsigned state1, unsigned state2, bdd b_loop_cond) {
 	bdd cond = bddfalse;
 	for (auto& edge : aut->out(state1)) {
 		if (edge.dst == state2) {
 			if (!bdd_implies(edge.cond, b_loop_cond)) {
-				return std::nullopt;
+				return maybe<bdd>::nothing();
 			}
 			cond = bdd_or(cond, edge.cond);
 		}
 	}
-	return { cond };
+	return maybe<bdd>::just(cond);
 }
 
 spot::twa_graph_ptr build_simplified_automaton(spot::twa_graph_ptr aut, unsigned base_state, std::vector<state_info> state_infos) {
@@ -171,8 +171,8 @@ spot::twa_graph_ptr simplify_one_scc(spot::twa_graph_ptr aut) {
 			for (auto& succ : si.succ(scc)) {
 				if (is_one_state_scc(si, succ) && si.is_accepting_scc(succ)) {
 					auto simpl_state = check_simplifiability(aut, state_of_scc, si.states_of(succ)[0]);
-					if (simpl_state != std::nullopt) {
-						states.push_back(*simpl_state);
+					if (simpl_state.isJust()) {
+						states.push_back(simpl_state.fromJust());
 					}
 				}
 			}
@@ -209,17 +209,17 @@ bool implies_language(spot::twa_graph_ptr aut, unsigned state1, unsigned state2)
 	return !aut1->intersects(coaut2);
 }
 
-std::optional<edge_t> check_snd_pattern(spot::twa_graph_ptr aut, edge_t edge, bdd c_edge_cond, unsigned state1, unsigned state2) {
+maybe<edge_t> check_snd_pattern(spot::twa_graph_ptr aut, edge_t edge, bdd c_edge_cond, unsigned state1, unsigned state2) {
 	auto oe = out_edges(aut, state1, state1);
 	auto condition = bdd_and(edge.cond, bdd_not(c_edge_cond));
 
 	for (auto& e : oe) {
 		if (bdd_implies(condition, e.cond) && implies_language(aut, state2, e.dst)) {
-			return { e };
+			return maybe<edge_t>::just(e);
 		}
 	}
 
-	return std::nullopt;
+	return maybe<edge_t>::nothing();
 }
 
 std::tuple<spot::twa_graph_ptr, unsigned, std::vector<unsigned>> copy_aut(spot::twa_graph_ptr aut, std::vector<unsigned> states) {
@@ -285,47 +285,47 @@ void add_edges(spot::twa_graph_ptr aut, state_info& si, unsigned new_state, std:
 	}
 }
 
-std::optional<state_info> check_simplifiability(spot::twa_graph_ptr aut, unsigned base_state, unsigned state2) {
+maybe<state_info> check_simplifiability(spot::twa_graph_ptr aut, unsigned base_state, unsigned state2) {
 	auto state2_loops = get_loops(aut, state2);
 	auto loops = get_loops(aut, base_state);
 	if (loops.size() != 1) {
-		return std::nullopt;
+		return maybe<state_info>::nothing();
 	}
 	auto& b_loop_edge = loops[0];
 
 	auto outEdges = check_out_edges(aut, base_state, state2);
-	if (!outEdges) {
-		return std::nullopt;
+	if (outEdges.isNothing()) {
+		return maybe<state_info>::nothing();
 	}
 
 	auto inEdges = check_in_edges(aut, base_state, state2);
-	if (!inEdges) {
-		return std::nullopt;
+	if (inEdges.isNothing()) {
+		return maybe<state_info>::nothing();
 	}
 
 	auto c_edge_cond = get_connecting_edge_condition(aut, base_state, state2, b_loop_edge.cond);
-	if (!c_edge_cond) {
-		return std::nullopt;
+	if (c_edge_cond.isNothing()) {
+		return maybe<state_info>::nothing();
 	}
 
 	for (auto& loop : state2_loops) {
 		if (loop.acc.count() != 0) {
-			if (!bdd_implies(loop.cond, *c_edge_cond) && !check_snd_pattern(aut, loop, *c_edge_cond, base_state, state2)) {
-				return std::nullopt;
+			if (!bdd_implies(loop.cond, c_edge_cond.fromJust()) && check_snd_pattern(aut, loop, c_edge_cond.fromJust(), base_state, state2).isNothing()) {
+				return maybe<state_info>::nothing();
 			}
 		} else {
-			if (!bdd_implies(loop.cond, b_loop_edge.cond) && !check_snd_pattern(aut, loop, b_loop_edge.cond, base_state, state2)) {
-				return std::nullopt;
+			if (!bdd_implies(loop.cond, b_loop_edge.cond) && check_snd_pattern(aut, loop, b_loop_edge.cond, base_state, state2).isNothing()) {
+				return maybe<state_info>::nothing();
 			}
 		}
 	}
 
 	state_info rv;
-	rv.inE = *inEdges;
-	rv.outE = *outEdges;
+	rv.inE = inEdges.fromJust();
+	rv.outE = outEdges.fromJust();
 	rv.state = state2;
 	rv.loops = state2_loops;
-	rv.c_cond = *c_edge_cond;
+	rv.c_cond = c_edge_cond.fromJust();
 	rv.b = loops[0];
 	return rv;
 }

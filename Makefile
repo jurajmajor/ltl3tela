@@ -18,7 +18,7 @@
 FILES = alternating.cpp nondeterministic.cpp automaton.cpp utils.cpp spotela.cpp main.cpp
 
 ltl3tela: $(FILES)
-	g++ -std=c++17 -o ltl3tela $(FILES) -lspot -lbddx
+	g++ -std=c++14 -o ltl3tela $(FILES) -lspot -lbddx
 
 clean:
 	rm ltl3tela
