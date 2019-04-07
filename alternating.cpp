@@ -114,11 +114,91 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 			}
 		} else if (f.is(spot::op::Or)) {
 			// create a state for each disjunct
-			for (unsigned i = 0, size = f.size(); i < size; ++i) {
-				auto fi_state_edges = slaa->get_state_edges(make_alternating_recursive(slaa, f[i]));
+			bdd state_labels_disj = bddfalse;
+			bool same_labels = true;
+			bool loops_not_alternating = true;
+			auto f_bar_size = f.size();
+			std::vector<std::set<unsigned>> edges_to_add(f_bar_size);
+			std::vector<unsigned> fi_states;
+
+			for (unsigned i = 0; i < f_bar_size; ++i) {
+				auto fi_st_id = make_alternating_recursive(slaa, f[i]);
+				auto fi_state_edges = slaa->get_state_edges(fi_st_id);
+
+				fi_states.push_back(fi_st_id);
+
+				bdd this_state_labels = bddfalse;
+				if (o_disj_merging && same_labels) {
+					for (auto edge_id : fi_state_edges) {
+						auto targets = slaa->get_edge(edge_id)->get_targets();
+						if (std::find(std::begin(targets), std::end(targets), fi_st_id) != std::end(targets)) {
+							this_state_labels = bdd_or(this_state_labels, slaa->get_edge(edge_id)->get_label());
+							if (targets.size() > 1) {
+								loops_not_alternating = false;
+								break;
+							}
+						}
+					}
+
+					if (i == 0) {
+						state_labels_disj = this_state_labels;
+					} else {
+						same_labels = bdd_implies(state_labels_disj, this_state_labels) && bdd_implies(this_state_labels, state_labels_disj);
+					}
+				}
+
+				for (auto edge_id : fi_state_edges) {
+					edges_to_add[i].insert(edge_id);
+				}
+			}
+
+			if (o_disj_merging && same_labels && loops_not_alternating) {
+				auto& ac = slaa->spot_aut->acc();
+				// FIXME we don't have support for ignoring this yet
+				// now just create a Fin mark and don't add it anywhere
+				slaa->acc[f].fin = ac.add_set();
+				slaa->acc[f].inf = -1U;
+
+				unsigned min_disj_mark = ac.add_sets(f_bar_size);
+				for (unsigned i = min_disj_mark; i < min_disj_mark + f_bar_size; ++i) {
+					slaa->acc[f].fin_disj.insert(i);
+				}
+
+				for (unsigned i = 0; i < f_bar_size; ++i) {
+					for (auto edge_id : edges_to_add[i]) {
+						// is this a loop?
+						auto edge = slaa->get_edge(edge_id);
+						auto targets = edge->get_targets(); // copy this!
+						auto fi_target_iter = std::find(std::begin(targets), std::end(targets), fi_states[i]);
+						if (fi_target_iter != std::end(targets)) {
+							// yes: remove this from targets set and add the whole disjunction instead
+							targets.erase(fi_target_iter);
+							targets.insert(state_id);
+
+							// add each mark from [min_disj_mark .. min_disj_mark + f_bar_size) except for min_disj_mark + i
+							std::set<acc_mark> marks;
+							for (unsigned j = min_disj_mark; j < min_disj_mark + f_bar_size; ++j) {
+								if (j != min_disj_mark + i) {
+									marks.insert(j);
+								}
+							}
+
+							auto orig_marks = edge->get_marks();
+							marks.insert(std::begin(orig_marks), std::end(orig_marks));
+
+							slaa->add_edge(state_id, slaa->get_edge(edge_id)->get_label(), targets, marks);
+						} else {
+							// just copy the edge
+							slaa->add_edge(state_id, edge_id);
+						}
+					}
+				}
+			} else {
 				// and add all its edges
-				for (auto& edge : fi_state_edges) {
-					slaa->add_edge(state_id, edge);
+				for (auto& edge_set : edges_to_add) {
+					for (auto edge_id : edge_set) {
+						slaa->add_edge(state_id, edge_id);
+					}
 				}
 			}
 		} else if (f.is(spot::op::X)) {

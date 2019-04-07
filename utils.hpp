@@ -40,6 +40,7 @@ extern bool o_ac_filter_fin;		// -t
 extern bool o_spot_simulation;		// -u
 extern bool o_spot_scc_filter;		// -z
 
+extern bool o_disj_merging;			// -D
 extern unsigned o_u_merge_level;	// -F
 extern unsigned o_g_merge_level;	// -G
 extern bool o_x_single_succ;		// -X
