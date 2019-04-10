@@ -484,8 +484,8 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 	}
 }
 
-SLAA* make_alternating(spot::formula f) {
-	SLAA* slaa = new SLAA(f);
+SLAA* make_alternating(spot::formula f, spot::bdd_dict_ptr dict) {
+	SLAA* slaa = new SLAA(f, dict);
 
 	if (o_single_init_state) {
 		std::set<unsigned> init_set = { make_alternating_recursive(slaa, f) };

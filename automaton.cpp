@@ -771,8 +771,8 @@ void SLAA::print_dot() {
 }
 
 
-SLAA::SLAA(spot::formula f) {
-	spot_bdd_dict = spot::make_bdd_dict();
+SLAA::SLAA(spot::formula f, spot::bdd_dict_ptr dict) {
+	spot_bdd_dict = dict ? dict : spot::make_bdd_dict();
 	spot_aut = spot::make_twa_graph(spot_bdd_dict);
 
 	phi = f;

@@ -71,6 +71,7 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 		{"F", { "2", "0", "1", "3" }},
 		{"G", { "2", "0", "1" }},
 		{"i", { "0", "1" }},
+		{"l", { "1", "0" }},
 		{"m", { "0", "1", "2" }},
 		{"n", { "1", "0" }},
 		{"o", { "hoa", "dot" }},
@@ -206,4 +207,50 @@ spot::twa_graph_ptr compare_automata(spot::twa_graph_ptr aut1, spot::twa_graph_p
 	}
 
 	return aut1;
+}
+
+spot::formula simplify_formula(spot::formula f) {
+	f = spot::negative_normal_form(spot::unabbreviate(f));
+
+	if (o_simplify_formula) {
+		spot::tl_simplifier tl_simplif;
+		f = tl_simplif.simplify(f);
+	}
+
+	f = spot::unabbreviate(f);
+
+	return f;
+}
+
+bool is_suspendable(spot::formula f) {
+	if (f.is(spot::op::G)) {
+		return f[0].is_eventual() || is_suspendable(f[0]);
+	}
+
+	if (f.is(spot::op::R)) {
+		return (f[0].is_ff() && f[1].is_eventual()) || is_suspendable(f[1]);
+	}
+
+	if (f.is(spot::op::F)) {
+		return f[0].is_universal() || is_suspendable(f[1]);
+	}
+
+	if (f.is(spot::op::U)) {
+		return (f[0].is_tt() && f[1].is_universal()) || is_suspendable(f[1]);
+	}
+
+	if (f.is(spot::op::X)) {
+		return is_suspendable(f[0]);
+	}
+
+	if (f.is(spot::op::And, spot::op::Or)) {
+		for (auto g : f) {
+			if (!is_suspendable(g)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	return false;
 }

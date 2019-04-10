@@ -17,7 +17,7 @@
     along with LTL3TELA.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef ALTERATING_H
+#ifndef ALTERNATING_H
 #define ALTERNATING_H
 #include "utils.hpp"
 #include "automaton.hpp"
@@ -35,7 +35,7 @@ void register_ap_from_boolean_formula(SLAA* slaa, spot::formula f);
 bool is_mergeable(SLAA* slaa, spot::formula f);
 
 // converts an LTL formula to self-loop alternating automaton
-SLAA* make_alternating(spot::formula f);
+SLAA* make_alternating(spot::formula f, spot::bdd_dict_ptr dict = nullptr);
 
 // helper function for LTL to automata translation
 unsigned make_alternating_recursive(SLAA* slaa, spot::formula f);

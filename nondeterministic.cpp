@@ -60,8 +60,7 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa) {
 	unsigned last_inserted = 0;
 
 	// create an empty automaton
-	spot::bdd_dict_ptr dict = spot::make_bdd_dict();
-	spot::twa_graph_ptr aut = make_twa_graph(dict);
+	spot::twa_graph_ptr aut = make_twa_graph(slaa->spot_aut->get_dict());
 	// copy the APs from SLAA
 	aut->copy_ap_of(slaa->spot_aut);
 	// set the name of automaton
@@ -356,4 +355,117 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa) {
 	}
 
 	return aut;
+}
+
+std::pair<spot::twa_graph_ptr, SLAA*> build_best_nwa(spot::formula f, spot::bdd_dict_ptr dict /* = nullptr */, bool print_alternating /* = false */, bool exit_after_alternating /* = false */) {
+	spot::twa_graph_ptr nwa = nullptr;
+	SLAA* slaa_out = nullptr;
+
+	for (unsigned neg = 0; neg <= o_try_negation; ++neg) {
+		// neg means we try to negate the formula and complement
+		// the resulting automaton, if it's deterministic
+		// we then choose the smaller of the two automata
+		if (neg) {
+			f = simplify_formula(spot::formula::Not(f));
+		}
+
+		auto slaa = make_alternating(f, dict);
+
+		if (o_mergeable_info) {
+			// If some mergeable is present, true is already outputed
+			// from the call of is_mergeable or make_alternating_recursive
+			std::cout << false << std::endl;
+			std::exit(0);
+		}
+
+		bool slaa_filtered = o_spot_scc_filter || !print_alternating;
+		if (slaa_filtered) {
+			slaa->remove_unreachable_states();
+			slaa->remove_unnecessary_marks();
+		}
+
+		if (print_alternating && !neg) {
+			slaa_out = slaa;
+		}
+
+		if (!exit_after_alternating) {
+			if (!slaa_filtered) {
+				slaa->remove_unreachable_states();
+				slaa->remove_unnecessary_marks();
+			}
+
+			auto nwa_temp = make_nondeterministic(slaa);
+			if (!neg) {
+				// always assign the default value
+				nwa = nwa_temp;
+			} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
+				nwa_temp = spot::dualize(nwa_temp);
+				nwa = compare_automata(nwa, nwa_temp);
+			}
+		}
+
+		if (neg) {
+			// we have negated the formula so let's
+			// negate it once again so that we give
+			// ltl2tgba the original formula
+			f = spot::formula::Not(f);
+		}
+	}
+
+	if (!exit_after_alternating) {
+		if (o_try_ltl2tgba_spotela & 1) {
+			spot::twa_graph_ptr nwa_spot;
+			if (dict) {
+				spot::translator ltl2tgba(dict);
+				nwa_spot = ltl2tgba.run(f);
+			} else {
+				spot::translator ltl2tgba;
+				nwa_spot = ltl2tgba.run(f);
+			}
+			spot::postprocessor pp;
+			nwa_spot = pp.run(nwa_spot);
+
+			nwa = compare_automata(nwa, nwa_spot);
+		}
+
+		if (o_try_ltl2tgba_spotela & 2) {
+			auto nwa_spotela = spotela_simplify(nwa);
+			nwa = compare_automata(nwa, nwa_spotela);
+		}
+	}
+
+	return std::make_pair(nwa, slaa_out);
+}
+
+spot::twa_graph_ptr build_product_nwa(spot::formula f, spot::bdd_dict_ptr dict) {
+	if (f.is(spot::op::And, spot::op::Or) && !f.is_syntactic_obligation()) {
+		spot::twa_graph_ptr aut = nullptr;
+		for (auto g : f) {
+			auto g_aut = build_product_nwa(g, dict);
+			if (aut) {
+				if (f.is(spot::op::And)) {
+					if (is_suspendable(g)) {
+						aut = spot::product_susp(aut, g_aut);
+					} else {
+						aut = spot::product(aut, g_aut);
+					}
+				} else {
+					if (is_suspendable(g)) {
+						aut = spot::product_or_susp(aut, g_aut);
+					} else {
+						aut = spot::product_or(aut, g_aut);
+					}
+				}
+			} else {
+				aut = g_aut;
+			}
+		}
+
+		spot::postprocessor pp;
+		aut = pp.run(aut);
+
+		return aut;
+	} else {
+		return build_best_nwa(f, dict).first;
+	}
 }

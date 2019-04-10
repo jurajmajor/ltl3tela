@@ -19,15 +19,7 @@
 
 #include <iostream>
 #include <spot/misc/version.hh>
-#include <spot/tl/parse.hh>
-#include <spot/tl/print.hh>
-#include <spot/tl/unabbrev.hh>
-#include <spot/tl/nenoform.hh>
-#include <spot/tl/simplify.hh>
 #include <spot/twaalgos/dot.hh>
-#include <spot/twaalgos/dualize.hh>
-#include <spot/twaalgos/isdet.hh>
-#include <spot/twaalgos/translate.hh>
 #include <spot/twa/twagraph.hh>
 #include <string>
 #include "utils.hpp"
@@ -40,7 +32,10 @@ unsigned o_try_ltl2tgba_spotela;	// -b
 bool o_single_init_state;	// -i
 bool o_slaa_determ;			// -d
 unsigned o_eq_level;		// -e
+bool o_ltl_split;			// -l
 unsigned o_mergeable_info;	// -m
+bool o_try_negation;		// -n
+bool o_simplify_formula;	// -s
 bool o_ac_filter_fin;		// -t
 bool o_spot_simulation;		// -u
 bool o_spot_scc_filter;		// -z
@@ -131,7 +126,9 @@ int main(int argc, char* argv[])
 	o_single_init_state = std::stoi(args["i"]);
 	o_slaa_determ = std::stoi(args["d"]);
 	o_eq_level = std::stoi(args["e"]);
+	o_ltl_split = std::stoi(args["l"]);
 	o_mergeable_info = std::stoi(args["m"]);
+	o_try_negation = std::stoi(args["n"]);
 	o_ac_filter_fin = std::stoi(args["t"]);
 	o_spot_simulation = std::stoi(args["u"]);
 	o_spot_scc_filter = std::stoi(args["z"]);
@@ -145,74 +142,24 @@ int main(int argc, char* argv[])
 	o_single_init_state = o_single_init_state || o_disj_merging;
 
 	unsigned int print_phase = std::stoi(args["p"]);
-	unsigned int try_negation = std::stoi(args["n"]);
+
+	if ((print_phase & 1) && o_ltl_split) {
+		std::cerr << "Output of alternating automaton is only supported with -l0.\n";
+		return 2;
+	}
 
 	spot::twa_graph_ptr nwa = nullptr;
+	SLAA* slaa = nullptr;
+
+	f = simplify_formula(f);
 
 	try {
-		for (unsigned neg = 0; neg <= try_negation; ++neg) {
-			// neg means we try to negate the formula and complement
-			// the resulting automaton, if it's deterministic
-			// we then choose the smaller of the two automata
-			if (neg) {
-				f = spot::formula::Not(f);
-			}
+		std::tie(nwa, slaa) = build_best_nwa(f, nullptr, print_phase & 1, print_phase == 1);
 
-			f = spot::negative_normal_form(spot::unabbreviate(f));
-
-			if (args["s"] == "1") {
-				spot::tl_simplifier tl_simplif;
-				f = tl_simplif.simplify(f);
-			}
-
-			f = spot::unabbreviate(f);
-
-			auto slaa = make_alternating(f);
-
-			if (o_mergeable_info) {
-				// If some mergeable is present, true is already outputed
-				// from the call of is_mergeable or make_alternating_recursive
-				std::cout << false << std::endl;
-				std::exit(0);
-			}
-
-			if (o_spot_scc_filter || print_phase == 2) {
-				slaa->remove_unreachable_states();
-				slaa->remove_unnecessary_marks();
-			}
-
-			if ((print_phase & 1) && !neg) {
-				if (args["o"] == "dot") {
-					slaa->print_dot();
-				} else {
-					slaa->print_hoaf();
-				}
-			}
-
-			if (print_phase & 2) {
-				if (!o_spot_scc_filter && print_phase != 2) {
-					slaa->remove_unreachable_states();
-					slaa->remove_unnecessary_marks();
-				}
-
-				auto nwa_temp = make_nondeterministic(slaa);
-				if (!neg) {
-					// always assign the default value
-					nwa = nwa_temp;
-				} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
-					nwa_temp = spot::dualize(nwa_temp);
-					nwa = compare_automata(nwa, nwa_temp);
-				}
-			}
-
-			if (neg) {
-				// we have negated the formula so let's
-				// negate it once again so that we give
-				// ltl2tgba the original formula
-				f = spot::formula::Not(f);
-			}
-
-			delete slaa;
+		if (o_ltl_split) {
+			auto dict = nwa->get_dict();
+			auto nwa_prod = build_product_nwa(f, dict);
+			nwa = compare_automata(nwa, nwa_prod);
 		}
 	} catch (std::runtime_error& e) {
 		std::string what(e.what());
@@ -220,24 +167,23 @@ int main(int argc, char* argv[])
 		if (what == "Too many acceptance sets used.") {
 			std::cerr << "LTL3TELA is unable to set more than 32 acceptance marks.\n";
 			return 32;
+		} else {
+			std::cerr << what << std::endl;
+			return 3;
 		}
 	}
 
-	if (print_phase & 2) {
-		if (o_try_ltl2tgba_spotela & 1) {
-			spot::translator ltl2tgba;
-			spot::postprocessor pp;
-			auto nwa_spot = ltl2tgba.run(f);
-			nwa_spot = pp.run(nwa_spot);
-
-			nwa = compare_automata(nwa, nwa_spot);
+	if (slaa) {
+		if (args["o"] == "dot") {
+			slaa->print_dot();
+		} else {
+			slaa->print_hoaf();
 		}
 
-		if (o_try_ltl2tgba_spotela & 2) {
-			auto nwa_spotela = spotela_simplify(nwa);
-			nwa = compare_automata(nwa, nwa_spotela);
-		}
+		delete slaa;
+	}
 
+	if (nwa) {
 		if (args["o"] == "dot") {
 			spot::print_dot(std::cout, nwa);
 		} else {

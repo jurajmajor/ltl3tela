@@ -216,7 +216,7 @@ public:
 	// prints the automaton in DOT format
 	void print_dot();
 
-	SLAA(spot::formula f);
+	SLAA(spot::formula f, spot::bdd_dict_ptr dict = nullptr);
 };
 
 class NA : public Automaton<unsigned> {
