@@ -129,6 +129,7 @@ int main(int argc, char* argv[])
 	o_ltl_split = std::stoi(args["l"]);
 	o_mergeable_info = std::stoi(args["m"]);
 	o_try_negation = std::stoi(args["n"]);
+	o_simplify_formula = std::stoi(args["s"]);
 	o_ac_filter_fin = std::stoi(args["t"]);
 	o_spot_simulation = std::stoi(args["u"]);
 	o_spot_scc_filter = std::stoi(args["z"]);
