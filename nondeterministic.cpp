@@ -347,12 +347,7 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa) {
 		aut->purge_dead_states();
 	}
 
-	if (o_spot_simulation) {
-		spot::postprocessor pp;
-		pp.set_type(spot::postprocessor::Generic);
-		aut = pp.run(aut);
-		spot::cleanup_acceptance_here(aut);
-	}
+	aut = try_postprocessing(aut);
 
 	return aut;
 }
@@ -422,8 +417,7 @@ std::pair<spot::twa_graph_ptr, SLAA*> build_best_nwa(spot::formula f, spot::bdd_
 				spot::translator ltl2tgba;
 				nwa_spot = ltl2tgba.run(f);
 			}
-			spot::postprocessor pp;
-			nwa_spot = pp.run(nwa_spot);
+			nwa_spot = try_postprocessing(nwa_spot);
 
 			nwa = compare_automata(nwa, nwa_spot);
 		}
@@ -461,11 +455,23 @@ spot::twa_graph_ptr build_product_nwa(spot::formula f, spot::bdd_dict_ptr dict) 
 			}
 		}
 
-		spot::postprocessor pp;
-		aut = pp.run(aut);
+		aut = try_postprocessing(aut);
 
 		return aut;
 	} else {
 		return build_best_nwa(f, dict).first;
 	}
+}
+
+spot::twa_graph_ptr try_postprocessing(spot::twa_graph_ptr aut) {
+	if (o_spot_simulation) {
+		spot::postprocessor pp;
+		pp.set_type(spot::postprocessor::Generic);
+		auto p_aut = pp.run(aut);
+		spot::cleanup_acceptance_here(p_aut);
+
+		aut = compare_automata(p_aut, aut);
+	}
+
+	return aut;
 }

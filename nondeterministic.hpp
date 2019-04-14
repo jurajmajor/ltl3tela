@@ -46,4 +46,6 @@ std::pair<spot::twa_graph_ptr, SLAA*> build_best_nwa(spot::formula f, spot::bdd_
 
 spot::twa_graph_ptr build_product_nwa(spot::formula f, spot::bdd_dict_ptr dict);
 
+spot::twa_graph_ptr try_postprocessing(spot::twa_graph_ptr aut);
+
 #endif
