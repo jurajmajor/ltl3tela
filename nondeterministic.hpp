@@ -42,9 +42,9 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa);
 // chooses the best nondeterministic automaton for a given formula
 // returns nullptr in the first element of the pair if only alternating automaton is to be produced
 // returns nullptr in the second element if alternating automaton is not to be printed
-std::pair<spot::twa_graph_ptr, SLAA*> build_best_nwa(spot::formula f, spot::bdd_dict_ptr dict = nullptr, bool print_alternating = false, bool exit_after_alternating = false);
+std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula f, spot::bdd_dict_ptr dict = nullptr, bool print_alternating = false, bool exit_after_alternating = false);
 
-spot::twa_graph_ptr build_product_nwa(spot::formula f, spot::bdd_dict_ptr dict);
+std::pair<spot::twa_graph_ptr, std::string> build_product_nwa(spot::formula f, spot::bdd_dict_ptr dict);
 
 spot::twa_graph_ptr try_postprocessing(spot::twa_graph_ptr aut);
 

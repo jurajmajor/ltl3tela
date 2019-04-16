@@ -38,6 +38,7 @@ bool o_try_negation;		// -n
 bool o_simplify_formula;	// -s
 bool o_ac_filter_fin;		// -t
 bool o_spot_simulation;		// -u
+bool o_stats;				// -x
 bool o_spot_scc_filter;		// -z
 
 bool o_disj_merging;		// -D
@@ -108,6 +109,7 @@ int main(int argc, char* argv[])
 			<< "\t-t[0|1]\timproved construction of acceptance condition (default on)\n"
 			<< "\t-u[0|1]\tsimulation of nondeterministic automaton (default on)\n"
 			<< "\t-v\tprint version and exit\n"
+			<< "\t-x[0|1]\t(for experiments only) statistics to STDERR (default off)\n"
 			<< "\t-X[0|1]\ttranslate X phi as (X phi) --tt--> (phi) (default off)\n"
 			<< "\t-z[0|1]\tcall scc_filter on nondeterministic automaton (default on)\n";
 
@@ -132,6 +134,7 @@ int main(int argc, char* argv[])
 	o_simplify_formula = std::stoi(args["s"]);
 	o_ac_filter_fin = std::stoi(args["t"]);
 	o_spot_simulation = std::stoi(args["u"]);
+	o_stats = std::stoi(args["x"]);
 	o_spot_scc_filter = std::stoi(args["z"]);
 
 	o_disj_merging = std::stoi(args["D"]);
@@ -151,16 +154,21 @@ int main(int argc, char* argv[])
 
 	spot::twa_graph_ptr nwa = nullptr;
 	SLAA* slaa = nullptr;
+	std::string stats("");
 
 	f = simplify_formula(f);
 
 	try {
-		std::tie(nwa, slaa) = build_best_nwa(f, nullptr, print_phase & 1, print_phase == 1);
+		std::tie(nwa, slaa, stats) = build_best_nwa(f, nullptr, print_phase & 1, print_phase == 1);
 
 		if (o_ltl_split) {
 			auto dict = nwa->get_dict();
-			auto nwa_prod = build_product_nwa(f, dict);
-			nwa = compare_automata(nwa, nwa_prod);
+
+			spot::twa_graph_ptr nwa_prod;
+			std::string stats_prod;
+
+			std::tie(nwa_prod, stats_prod) = build_product_nwa(f, dict);
+			std::tie(nwa, stats) = compare_automata(nwa, nwa_prod, stats, stats_prod);
 		}
 	} catch (std::runtime_error& e) {
 		std::string what(e.what());
@@ -191,6 +199,10 @@ int main(int argc, char* argv[])
 			spot::print_hoa(std::cout, nwa);
 			std::cout << '\n';
 		}
+	}
+
+	if (o_stats) {
+		std::cerr << stats;
 	}
 
 	// do not call bdd_done(), we use libbddx

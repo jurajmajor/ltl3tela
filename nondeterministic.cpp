@@ -352,9 +352,11 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa) {
 	return aut;
 }
 
-std::pair<spot::twa_graph_ptr, SLAA*> build_best_nwa(spot::formula f, spot::bdd_dict_ptr dict /* = nullptr */, bool print_alternating /* = false */, bool exit_after_alternating /* = false */) {
+std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula f, spot::bdd_dict_ptr dict /* = nullptr */, bool print_alternating /* = false */, bool exit_after_alternating /* = false */) {
 	spot::twa_graph_ptr nwa = nullptr;
 	SLAA* slaa_out = nullptr;
+
+	std::string stats("basic");
 
 	for (unsigned neg = 0; neg <= o_try_negation; ++neg) {
 		// neg means we try to negate the formula and complement
@@ -395,7 +397,7 @@ std::pair<spot::twa_graph_ptr, SLAA*> build_best_nwa(spot::formula f, spot::bdd_
 				nwa = nwa_temp;
 			} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
 				nwa_temp = spot::dualize(nwa_temp);
-				nwa = compare_automata(nwa, nwa_temp);
+				std::tie(nwa, stats) = compare_automata(nwa, nwa_temp, stats, "neg");
 			}
 		}
 
@@ -419,23 +421,33 @@ std::pair<spot::twa_graph_ptr, SLAA*> build_best_nwa(spot::formula f, spot::bdd_
 			}
 			nwa_spot = try_postprocessing(nwa_spot);
 
-			nwa = compare_automata(nwa, nwa_spot);
+			std::tie(nwa, stats) = compare_automata(nwa, nwa_spot, stats, "spot");
 		}
 
 		if (o_try_ltl2tgba_spotela & 2) {
 			auto nwa_spotela = spotela_simplify(nwa);
-			nwa = compare_automata(nwa, nwa_spotela);
+			std::tie(nwa, stats) = compare_automata(nwa, nwa_spotela, stats, stats + "+spotela");
 		}
 	}
 
-	return std::make_pair(nwa, slaa_out);
+	stats += "\n";
+
+	return std::make_tuple(nwa, slaa_out, stats);
 }
 
-spot::twa_graph_ptr build_product_nwa(spot::formula f, spot::bdd_dict_ptr dict) {
+std::pair<spot::twa_graph_ptr, std::string> build_product_nwa(spot::formula f, spot::bdd_dict_ptr dict) {
+	std::ostringstream stats("");
+
 	if (f.is(spot::op::And, spot::op::Or) && !f.is_syntactic_obligation()) {
 		spot::twa_graph_ptr aut = nullptr;
 		for (auto g : f) {
-			auto g_aut = build_product_nwa(g, dict);
+			spot::twa_graph_ptr g_aut;
+			std::string g_stats;
+
+			std::tie(g_aut, g_stats) = build_product_nwa(g, dict);
+
+			stats << g_stats;
+
 			if (aut) {
 				if (f.is(spot::op::And)) {
 					if (is_suspendable(g)) {
@@ -457,9 +469,13 @@ spot::twa_graph_ptr build_product_nwa(spot::formula f, spot::bdd_dict_ptr dict) 
 
 		aut = try_postprocessing(aut);
 
-		return aut;
+		return std::make_pair(aut, stats.str());
 	} else {
-		return build_best_nwa(f, dict).first;
+		auto best = build_best_nwa(f, dict);
+		spot::tl_simplifier simp;
+		stats << spot::unabbreviate(simp.simplify(f), "WM") << ";" << std::get<2>(best);
+
+		return std::make_pair(std::get<0>(best), stats.str());
 	}
 }
 
@@ -470,7 +486,7 @@ spot::twa_graph_ptr try_postprocessing(spot::twa_graph_ptr aut) {
 		auto p_aut = pp.run(aut);
 		spot::cleanup_acceptance_here(p_aut);
 
-		aut = compare_automata(p_aut, aut);
+		aut = compare_automata(p_aut, aut).first;
 	}
 
 	return aut;

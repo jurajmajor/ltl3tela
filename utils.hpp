@@ -45,6 +45,7 @@ extern unsigned o_mergeable_info;	// -m
 extern bool o_try_negation;			// -n
 extern bool o_simplify_formula;		// -s
 extern bool o_ac_filter_fin;		// -t
+extern bool o_stats;				// -x
 extern bool o_spot_simulation;		// -u
 extern bool o_spot_scc_filter;		// -z
 
@@ -60,7 +61,7 @@ std::set<std::set<spot::formula>> f_bar(spot::formula f);
 std::map<std::string, std::string> parse_arguments(int argc, char* argv[]);
 
 // return the better (smaller, more deterministic) of the two automata
-spot::twa_graph_ptr compare_automata(spot::twa_graph_ptr aut1, spot::twa_graph_ptr aut2);
+std::pair<spot::twa_graph_ptr, std::string> compare_automata(spot::twa_graph_ptr aut1, spot::twa_graph_ptr aut2, std::string stats_id1 = "", std::string stats_id2 = "");
 
 // simplifies the formula in a way corresponding to used flags
 spot::formula simplify_formula(spot::formula f);

@@ -79,6 +79,7 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 		{"s", { "1", "0" }},
 		{"t", { "1", "0" }},
 		{"u", { "1", "0" }},
+		{"x", { "0", "1" }},
 		{"X", { "0", "1" }},
 		{"z", { "1", "0" }},
 	};
@@ -165,48 +166,51 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 // 3. choose semideterministic automaton
 // 4. choose automaton with smaller number of acc. sets
 // 5. return aut1
-spot::twa_graph_ptr compare_automata(spot::twa_graph_ptr aut1, spot::twa_graph_ptr aut2) {
+std::pair<spot::twa_graph_ptr, std::string> compare_automata(spot::twa_graph_ptr aut1, spot::twa_graph_ptr aut2, std::string stats_id1, std::string stats_id2) {
 	auto ns1 = aut1->num_states();
 	auto ns2 = aut2->num_states();
 
+	auto p1 = std::make_pair(aut1, stats_id1);
+	auto p2 = std::make_pair(aut2, stats_id2);
+
 	if (ns1 < ns2) {
-		return aut1;
+		return p1;
 	}
 
 	if (ns2 < ns1) {
-		return aut2;
+		return p2;
 	}
 
 	auto det1 = spot::is_universal(aut1);
 	auto det2 = spot::is_universal(aut2);
 
 	if (det1 && !det2) {
-		return aut1;
+		return p1;
 	}
 
 	if (det2 && !det1) {
-		return aut2;
+		return p2;
 	}
 
 	auto sdet1 = spot::is_semi_deterministic(aut1);
 	auto sdet2 = spot::is_semi_deterministic(aut2);
 
 	if (sdet1 && !sdet2) {
-		return aut1;
+		return p1;
 	}
 
 	if (sdet2 && !sdet1) {
-		return aut2;
+		return p2;
 	}
 
 	auto as1 = aut1->acc().num_sets();
 	auto as2 = aut2->acc().num_sets();
 
 	if (as2 < as1) {
-		return aut2;
+		return p2;
 	}
 
-	return aut1;
+	return p1;
 }
 
 spot::formula simplify_formula(spot::formula f) {
