@@ -41,9 +41,9 @@ bool o_spot_simulation;		// -u
 bool o_stats;				// -x
 bool o_spot_scc_filter;		// -z
 
-bool o_disj_merging;		// -D
 unsigned o_u_merge_level;	// -F
 unsigned o_g_merge_level;	// -G
+bool o_disj_merging;		// -O
 bool o_x_single_succ;		// -X
 
 int main(int argc, char* argv[])
@@ -77,7 +77,6 @@ int main(int argc, char* argv[])
 			<< "\t\t2\ttry SPOTELA\n"
 			<< "\t\t3\ttry ltl2tgba+SPOTELA (default)\n"
 			<< "\t-d[0|1]\tmore deterministic SLAA construction (default on)\n"
-			<< "\t-D[0|1]\tdisjunction merging (default on)\n"
 			<< "\t-e[0|1|2]\tequivalence check on NA\n"
 			<< "\t\t0\tno check\n"
 			<< "\t\t1\tltl2ba's simple check\n"
@@ -101,6 +100,7 @@ int main(int argc, char* argv[])
 			<< "\t-o [hoa|dot]\ttype of output\n"
 			<< "\t\thoa\tprint automaton in HOA format (default)\n"
 			<< "\t\tdot\tprint dot format\n"
+			<< "\t-O[0|1]\tdisjunction merging (default on)\n"
 			<< "\t-p[1|2|3]\tphase of translation\n"
 			<< "\t\t1\tprint SLAA\n"
 			<< "\t\t2\tprint NA (default)\n"
@@ -137,12 +137,12 @@ int main(int argc, char* argv[])
 	o_stats = std::stoi(args["x"]);
 	o_spot_scc_filter = std::stoi(args["z"]);
 
-	o_disj_merging = std::stoi(args["D"]);
 	o_u_merge_level = std::stoi(args["F"]);
 	o_g_merge_level = std::stoi(args["G"]);
+	o_disj_merging = std::stoi(args["O"]);
 	o_x_single_succ = std::stoi(args["X"]);
 
-	// -D1 implies -i1
+	// -O1 implies -i1
 	o_single_init_state = o_single_init_state || o_disj_merging;
 
 	unsigned int print_phase = std::stoi(args["p"]);
