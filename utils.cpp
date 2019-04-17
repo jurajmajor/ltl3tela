@@ -66,6 +66,7 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 		{"a", { "0", "2", "3" }},
 		{"b", { "3", "2", "1", "0" }},
 		{"d", { "1", "0" }},
+		{"D", { "0", "1" }},
 		{"e", { "2", "0", "1" }},
 		{"F", { "2", "0", "1", "3" }},
 		{"G", { "2", "0", "1" }},
@@ -173,6 +174,19 @@ std::pair<spot::twa_graph_ptr, std::string> compare_automata(spot::twa_graph_ptr
 	auto p1 = std::make_pair(aut1, stats_id1);
 	auto p2 = std::make_pair(aut2, stats_id2);
 
+	auto det1 = spot::is_universal(aut1);
+	auto det2 = spot::is_universal(aut2);
+
+	if (o_deterministic) {
+		if (det1 && !det2) {
+			return p1;
+		}
+
+		if (det2 && !det1) {
+			return p2;
+		}
+	}
+
 	if (ns1 < ns2) {
 		return p1;
 	}
@@ -181,15 +195,14 @@ std::pair<spot::twa_graph_ptr, std::string> compare_automata(spot::twa_graph_ptr
 		return p2;
 	}
 
-	auto det1 = spot::is_universal(aut1);
-	auto det2 = spot::is_universal(aut2);
+	if (!o_deterministic) { // otherwise we have already tested this
+		if (det1 && !det2) {
+			return p1;
+		}
 
-	if (det1 && !det2) {
-		return p1;
-	}
-
-	if (det2 && !det1) {
-		return p2;
+		if (det2 && !det1) {
+			return p2;
+		}
 	}
 
 	auto sdet1 = spot::is_semi_deterministic(aut1);

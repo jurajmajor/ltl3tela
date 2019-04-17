@@ -483,6 +483,9 @@ spot::twa_graph_ptr try_postprocessing(spot::twa_graph_ptr aut) {
 	if (o_spot_simulation) {
 		spot::postprocessor pp;
 		pp.set_type(spot::postprocessor::Generic);
+		if (o_deterministic) {
+			pp.set_pref(spot::postprocessor::Deterministic);
+		}
 		auto p_aut = pp.run(aut);
 		spot::cleanup_acceptance_here(p_aut);
 

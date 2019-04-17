@@ -49,6 +49,8 @@ extern bool o_stats;				// -x
 extern bool o_spot_simulation;		// -u
 extern bool o_spot_scc_filter;		// -z
 
+extern bool o_deterministic;		// -D
+
 extern unsigned o_u_merge_level;	// -F
 extern unsigned o_g_merge_level;	// -G
 extern bool o_disj_merging;			// -O
