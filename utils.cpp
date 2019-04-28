@@ -205,6 +205,28 @@ std::pair<spot::twa_graph_ptr, std::string> compare_automata(spot::twa_graph_ptr
 		}
 	}
 
+	auto as1 = aut1->acc().num_sets();
+	auto as2 = aut2->acc().num_sets();
+
+	if (as1 < as2) {
+		return p1;
+	}
+
+	if (as2 < as1) {
+		return p2;
+	}
+
+	auto ne1 = aut1->num_edges();
+	auto ne2 = aut2->num_edges();
+
+	if (ne1 < ne2) {
+		return p1;
+	}
+
+	if (ne2 < ne1) {
+		return p2;
+	}
+
 	auto sdet1 = spot::is_semi_deterministic(aut1);
 	auto sdet2 = spot::is_semi_deterministic(aut2);
 
@@ -213,13 +235,6 @@ std::pair<spot::twa_graph_ptr, std::string> compare_automata(spot::twa_graph_ptr
 	}
 
 	if (sdet2 && !sdet1) {
-		return p2;
-	}
-
-	auto as1 = aut1->acc().num_sets();
-	auto as2 = aut2->acc().num_sets();
-
-	if (as2 < as1) {
 		return p2;
 	}
 
