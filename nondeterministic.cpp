@@ -417,10 +417,16 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 				if (o_deterministic) {
 					ltl2tgba.set_type(spot::postprocessor::Generic);
 					ltl2tgba.set_pref(spot::postprocessor::Deterministic);
+					ltl2tgba.set_level(spot::postprocessor::High);
 				}
 				nwa_spot = ltl2tgba.run(f);
 			} else {
 				spot::translator ltl2tgba;
+				if (o_deterministic) {
+					ltl2tgba.set_type(spot::postprocessor::Generic);
+					ltl2tgba.set_pref(spot::postprocessor::Deterministic);
+					ltl2tgba.set_level(spot::postprocessor::High);
+				}
 				nwa_spot = ltl2tgba.run(f);
 			}
 			nwa_spot = try_postprocessing(nwa_spot);
