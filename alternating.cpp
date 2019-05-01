@@ -505,5 +505,9 @@ SLAA* make_alternating(spot::formula f, spot::bdd_dict_ptr dict) {
 
 	slaa->build_acc();
 
+	if (o_slaa_determ == 2) {
+		slaa->apply_extended_domination();
+	}
+
 	return slaa;
 }

@@ -30,7 +30,7 @@
 
 unsigned o_try_ltl2tgba_spotela;	// -b
 bool o_single_init_state;	// -i
-bool o_slaa_determ;			// -d
+unsigned o_slaa_determ;		// -d
 unsigned o_eq_level;		// -e
 bool o_ltl_split;			// -l
 unsigned o_mergeable_info;	// -m
@@ -78,7 +78,10 @@ int main(int argc, char* argv[])
 			<< "\t\t1\ttry ltl2tgba\n"
 			<< "\t\t2\ttry SPOTELA\n"
 			<< "\t\t3\ttry ltl2tgba+SPOTELA (default)\n"
-			<< "\t-d[0|1]\tmore deterministic SLAA construction (default on)\n"
+			<< "\t-d\tmore deterministic SLAA construction\n"
+			<< "\t\t0\tno optimization\n"
+			<< "\t\t1\tclassical transition dominance\n"
+			<< "\t\t0\textended transition dominance (default)\n"
 			<< "\t-D[0|1]\tproduce deterministic NA\n"
 			<< "\t-e[0|1|2]\tequivalence check on NA\n"
 			<< "\t\t0\tno check\n"

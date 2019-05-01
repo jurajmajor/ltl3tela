@@ -38,7 +38,7 @@
 
 extern unsigned o_try_ltl2tgba_spotela;	// -b
 extern bool o_single_init_state;	// -i
-extern bool o_slaa_determ;			// -d
+extern unsigned o_slaa_determ;		// -d
 extern unsigned o_eq_level;			// -e
 extern bool o_ltl_split;			// -l
 extern unsigned o_mergeable_info;	// -m

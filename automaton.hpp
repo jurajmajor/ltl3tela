@@ -210,6 +210,11 @@ public:
 	// such that all loops over q contain j as the only mark
 	ac_representation mark_transformation(std::map<acc_mark, unsigned>& tgba_mark_owners);
 
+	std::set<std::set<acc_mark>> get_minimal_models_of_acc_cond() const;
+
+	// postprocessing: remove dominated transition w.r.t. acceptance condition
+	void apply_extended_domination();
+
 	// prints the automaton in HOA format
 	void print_hoaf();
 

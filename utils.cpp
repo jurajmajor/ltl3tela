@@ -65,7 +65,7 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 	std::map<std::string, std::vector<std::string>> allowed_values = {
 		{"a", { "0", "2", "3" }},
 		{"b", { "3", "2", "1", "0" }},
-		{"d", { "1", "0" }},
+		{"d", { "2", "0", "1" }},
 		{"D", { "0", "1" }},
 		{"e", { "2", "0", "1" }},
 		{"F", { "2", "0", "1", "3" }},

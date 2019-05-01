@@ -306,6 +306,118 @@ void SLAA::build_acc() {
 	}
 }
 
+std::set<std::set<acc_mark>> SLAA::get_minimal_models_of_acc_cond() const {
+	std::set<std::set<acc_mark>> models = {{}};
+	for (auto& ac : acc) {
+		// for each conjunct, either add Inf, or "large" Fin + one Fin from disjunction (if exists)
+		std::set<std::set<acc_mark>> options;
+		if (ac.second.fin_disj.empty()) {
+			options.insert(std::set<acc_mark>({ ac.second.fin }));
+		} else {
+			for (auto fd : ac.second.fin_disj) {
+				options.insert(std::set<acc_mark>({ ac.second.fin, fd }));
+			}
+		}
+		if (ac.second.inf != -1U) {
+			options.insert(std::set<acc_mark>({ ac.second.inf }));
+		}
+
+		// extend existing models with all of the options
+		std::set<std::set<acc_mark>> new_models;
+		for (auto& m : models) {
+			for (auto o : options) {
+				o.insert(std::begin(m), std::end(m));
+				new_models.insert(o);
+			}
+		}
+		models = new_models;
+	}
+	return models;
+}
+
+void SLAA::apply_extended_domination() {
+	const auto& mm = get_minimal_models_of_acc_cond();
+	for (unsigned state_id = 0, states_count = states.size(); state_id < states_count; ++state_id) {
+		for (auto e1_id : state_edges[state_id]) {
+			auto e1 = get_edge(e1_id);
+
+			for (auto e2_it = std::begin(state_edges[state_id]); e2_it != std::end(state_edges[state_id]); /* NOP */) {
+				if (e1_id == *e2_it) {
+					++e2_it;
+					continue; // do not check dominance of edge over itself
+				}
+
+				auto e2 = get_edge(*e2_it);
+
+				auto o1 = e1->get_targets();
+				auto o2 = e2->get_targets();
+
+				auto j1 = e1->get_marks();
+				auto j2 = e2->get_marks();
+
+				// e1 dominates e2 iff
+				// 1. e1.targets ⊆ e2.targets
+				// 2. ∀ minimal model M of Φ:
+				// 2a. M ∩ Fin(Φ) ∩ e2.marks = ∅ => M ∩ Fin(Φ) ∩ e1.marks = ∅
+				// 2b. M ∩ Inf(Φ) ∩ e1.marks = ∅ => M ∩ Inf(Φ) ∩ e2.marks = ∅
+				bool dominates = false;
+				if (std::includes(std::begin(o2), std::end(o2), std::begin(o1), std::end(o1))) { // condition (1) holds
+					const auto& inf_marks = get_inf_marks();
+
+					dominates = true; // we may rewrite this again later
+
+					for (const auto& model : mm) {
+						std::set<acc_mark> m_e1;
+						std::set<acc_mark> m_e2;
+						std::set_intersection(std::begin(model), std::end(model), std::begin(j1), std::end(j1), std::inserter(m_e1, std::begin(m_e1)));
+						std::set_intersection(std::begin(model), std::end(model), std::begin(j2), std::end(j2), std::inserter(m_e2, std::begin(m_e2)));
+
+						bool m_fin_in_e1 = false;
+						bool m_fin_in_e2 = false;
+						bool m_inf_in_e1 = false;
+						bool m_inf_in_e2 = false;
+
+						for (auto i : m_e1) {
+							if (std::find(std::begin(inf_marks), std::end(inf_marks), i) == std::end(inf_marks)) {
+								m_fin_in_e1 = true;
+							} else {
+								m_inf_in_e1 = true;
+							}
+						}
+
+						for (auto i : m_e2) {
+							if (std::find(std::begin(inf_marks), std::end(inf_marks), i) == std::end(inf_marks)) {
+								m_fin_in_e2 = true;
+							} else {
+								m_inf_in_e2 = true;
+							}
+						}
+
+						if (!m_fin_in_e2 && m_fin_in_e1 || !m_inf_in_e1 && m_inf_in_e2) {
+							dominates = false;
+							break;
+						}
+					}
+				}
+
+				if (dominates) {
+					// e1 dominates e2 so we restrict e2's label
+					bdd e2_new_label = e2->get_label() & bdd_not(e1->get_label());
+
+					if (e2_new_label == bddfalse) {
+						e2_it = state_edges[state_id].erase(e2_it);
+					} else {
+						e2->set_label(e2_new_label);
+						++e2_it;
+					}
+				} else {
+					++e2_it;
+				}
+			}
+		}
+	}
+}
+
 spot::formula SLAA::get_input_formula() const {
 	return phi;
 }
@@ -769,7 +881,6 @@ void SLAA::print_dot() {
 	std::cout << "\tlabeljust=right\n";
 	std::cout << "}\n";
 }
-
 
 SLAA::SLAA(spot::formula f, spot::bdd_dict_ptr dict) {
 	spot_bdd_dict = dict ? dict : spot::make_bdd_dict();
