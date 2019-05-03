@@ -407,7 +407,7 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 		} catch (std::runtime_error& e) {
 			std::string what(e.what());
 
-			if (what.find("Too many acceptance sets used.") == 0) {
+			if (what.find("Too many acceptance sets used.") == 0 && !exit_after_alternating) {
 				// nevermind, Spot will do it (hopefully)
 				we_crashed = true;
 			} else {
