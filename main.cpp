@@ -167,6 +167,8 @@ int main(int argc, char* argv[])
 	try {
 		std::tie(nwa, slaa, stats) = build_best_nwa(f, nullptr, print_phase & 1, print_phase == 1);
 
+		f = simplify_formula(f);
+
 		if (o_ltl_split) {
 			auto dict = nwa->get_dict();
 
