@@ -359,6 +359,9 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 	std::string stats("basic");
 	bool we_crashed = false;
 
+	auto orig_f = f;
+	f = simplify_formula(f);
+
 	for (unsigned neg = 0; neg <= o_try_negation; ++neg) {
 		// neg means we try to negate the formula and complement
 		// the resulting automaton, if it's deterministic
@@ -417,10 +420,9 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 		}
 
 		if (neg) {
-			// we have negated the formula so let's
-			// negate it once again so that we give
-			// ltl2tgba the original formula
-			f = spot::formula::Not(f);
+			// we have negated the formula so let's negate it once again
+			// so that we won't be confused if we work with f in the future
+			f = simplify_formula(spot::formula::Not(f));
 		}
 	}
 
@@ -434,7 +436,7 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 					ltl2tgba.set_pref(spot::postprocessor::Deterministic);
 					ltl2tgba.set_level(spot::postprocessor::High);
 				}
-				nwa_spot = ltl2tgba.run(f);
+				nwa_spot = ltl2tgba.run(orig_f);
 			} else {
 				spot::translator ltl2tgba;
 				if (o_deterministic) {
@@ -442,7 +444,7 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 					ltl2tgba.set_pref(spot::postprocessor::Deterministic);
 					ltl2tgba.set_level(spot::postprocessor::High);
 				}
-				nwa_spot = ltl2tgba.run(f);
+				nwa_spot = ltl2tgba.run(orig_f);
 			}
 			nwa_spot = try_postprocessing(nwa_spot);
 

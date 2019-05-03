@@ -164,8 +164,6 @@ int main(int argc, char* argv[])
 	SLAA* slaa = nullptr;
 	std::string stats("");
 
-	f = simplify_formula(f);
-
 	try {
 		std::tie(nwa, slaa, stats) = build_best_nwa(f, nullptr, print_phase & 1, print_phase == 1);
 
@@ -181,7 +179,7 @@ int main(int argc, char* argv[])
 	} catch (std::runtime_error& e) {
 		std::string what(e.what());
 
-		if (what == "Too many acceptance sets used.") {
+		if (what.find("Too many acceptance sets used.") == 0) {
 			std::cerr << "LTL3TELA is unable to set more than 32 acceptance marks.\n";
 			return 32;
 		} else {
