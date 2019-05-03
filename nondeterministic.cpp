@@ -357,6 +357,7 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 	SLAA* slaa_out = nullptr;
 
 	std::string stats("basic");
+	bool we_crashed = false;
 
 	for (unsigned neg = 0; neg <= o_try_negation; ++neg) {
 		// neg means we try to negate the formula and complement
@@ -366,38 +367,52 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 			f = simplify_formula(spot::formula::Not(f));
 		}
 
-		auto slaa = make_alternating(f, dict);
+		try {
+			auto slaa = make_alternating(f, dict);
 
-		if (o_mergeable_info) {
-			// If some mergeable is present, true is already outputed
-			// from the call of is_mergeable or make_alternating_recursive
-			std::cout << false << std::endl;
-			std::exit(0);
-		}
+			if (o_mergeable_info) {
+				// If some mergeable is present, true is already outputed
+				// from the call of is_mergeable or make_alternating_recursive
+				std::cout << false << std::endl;
+				std::exit(0);
+			}
 
-		bool slaa_filtered = o_spot_scc_filter || !print_alternating;
-		if (slaa_filtered) {
-			slaa->remove_unreachable_states();
-			slaa->remove_unnecessary_marks();
-		}
-
-		if (print_alternating && !neg) {
-			slaa_out = slaa;
-		}
-
-		if (!exit_after_alternating) {
-			if (!slaa_filtered) {
+			bool slaa_filtered = o_spot_scc_filter || !print_alternating;
+			if (slaa_filtered) {
 				slaa->remove_unreachable_states();
 				slaa->remove_unnecessary_marks();
 			}
 
-			auto nwa_temp = make_nondeterministic(slaa);
-			if (!neg) {
-				// always assign the default value
-				nwa = nwa_temp;
-			} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
-				nwa_temp = spot::dualize(nwa_temp);
-				std::tie(nwa, stats) = compare_automata(nwa, nwa_temp, stats, "neg");
+			if (print_alternating && !neg) {
+				slaa_out = slaa;
+			}
+
+			if (!exit_after_alternating) {
+				if (!slaa_filtered) {
+					slaa->remove_unreachable_states();
+					slaa->remove_unnecessary_marks();
+				}
+
+				auto nwa_temp = make_nondeterministic(slaa);
+				if (!neg || we_crashed) {
+					// always assign the default value, nothing to compare
+					nwa = nwa_temp;
+				} else if (spot::is_universal(nwa_temp)) { // we are only interested if the automaton is deterministic
+					nwa_temp = spot::dualize(nwa_temp);
+					std::tie(nwa, stats) = compare_automata(nwa, nwa_temp, stats, "neg");
+				}
+			}
+
+			we_crashed = false;
+		} catch (std::runtime_error& e) {
+			std::string what(e.what());
+
+			if (what.find("Too many acceptance sets used.") == 0) {
+				// nevermind, Spot will do it (hopefully)
+				we_crashed = true;
+			} else {
+				// rethrow
+				throw e;
 			}
 		}
 
@@ -431,7 +446,12 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 			}
 			nwa_spot = try_postprocessing(nwa_spot);
 
-			std::tie(nwa, stats) = compare_automata(nwa, nwa_spot, stats, "spot");
+			if (we_crashed) {
+				nwa = nwa_spot;
+				stats = "spot";
+			} else {
+				std::tie(nwa, stats) = compare_automata(nwa, nwa_spot, stats, "spot");
+			}
 		}
 
 		if (o_try_ltl2tgba_spotela & 2) {
