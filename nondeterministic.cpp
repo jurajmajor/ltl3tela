@@ -448,7 +448,7 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 std::pair<spot::twa_graph_ptr, std::string> build_product_nwa(spot::formula f, spot::bdd_dict_ptr dict) {
 	std::ostringstream stats("");
 
-	if (f.is(spot::op::And, spot::op::Or) && !f.is_syntactic_obligation()) {
+	if (f.is(spot::op::And, spot::op::Or)) {
 		spot::twa_graph_ptr aut = nullptr;
 		for (auto g : f) {
 			spot::twa_graph_ptr g_aut;
