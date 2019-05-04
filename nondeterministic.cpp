@@ -500,6 +500,9 @@ std::pair<spot::twa_graph_ptr, std::string> build_product_nwa(spot::formula f, s
 		}
 
 		aut = try_postprocessing(aut);
+		if (o_try_ltl2tgba_spotela & 2) {
+			aut = spotela_simplify(aut);
+		}
 
 		return std::make_pair(aut, stats.str());
 	} else {
