@@ -1,15 +1,17 @@
 Overview
 ========
 
-LTL3TELA is a tool that translates LTL formulae to nondeterministic automata. The translation follows in two steps.
-1. The formula is translated into a an equivalent Self-loop Alternating Automaton (SLAA)
-2. The SLAA is deealternated into nondeterministic automaton.
+LTL3TELA is a tool that translates LTL formulae to deterministic or nondeterministic
+automata. The translation follows in the following steps.
+1. The formula is translated into an equivalent Self-loop Alternating Automaton (SLAA)
+2. The SLAA is dealternated into nondeterministic automaton.
+3. If needed, the nondeterministic automaton is determinized.
 
 Requirements
 ============
 
 The Spot library <https://spot.lrde.epita.fr/> has to be installed. Version
-2.4 or higher is required for LTL3TELA to compile and work properly.
+2.6 or higher is required for LTL3TELA to compile and work properly.
 
 Installation
 ============
@@ -23,26 +25,29 @@ See `./ltl3tela -h` for more information.
 Experimental evaluation
 =======================
 
-The first step of the translation used in LTL3TELA (LTL to SLAA) was submitted for presentation at the
-[LPAR-22](https://easychair.org/smart-program/LPAR-22/) conference.
-Jupyter notebook [Evaluation_LPAR18](Experiments/Evaluation_LPAR18.ipynb)
-contains scripts and other data used to evaluate performance of F-merging and F,G-merging introduced in the paper. Their performance is also compared to translation implemented in the tool [LTL3BA](https://sourceforge.net/projects/ltl3ba/). The impact of the merging was performed on the set of formulae traditionally used to benchmark LTL translators and on 1000 randomly generated formulae that contain only operators F and G.
+The translation of LTL to deterministic and nondeterministic automata was submitted
+for presentation at the [ATVA 2019](http://atva2019.iis.sinica.edu.tw/) conference.
+Jupyter notebook [Evaluation_ATVA19](Experiments/Evaluation_ATVA19.ipynb) contains
+scripts and other data to evaluate the performance compared to the state-of-the-art
+tools. The impact of the merging was performed on the set of formulae traditionally
+used to benchmark LTL translators and on 1000 randomly generated formulae.
 
 ### Requirements
 
 If you would like to run the notebook by yourself, you need to have the
-folowing tools installed in `PATH` on your system.
+following tools installed in `PATH` on your system.
 
-* [SPOT](https://spot.lrde.epita.fr/) v. 2.6.1 with Python bindings
+* [SPOT](https://spot.lrde.epita.fr/) v. 2.7.4 with Python bindings
 * [Pandas](http://pandas.pydata.org/) Python library v. 20.3+
-* [Jupyter](http://jupyter.org/) notebook v 5.0+
-* [LTL3TELA](https://github.com/jurajmajor/ltl3tela) v 1.2.0
+* [Jupyter](http://jupyter.org/) notebook v. 5.0+
+* [LTL3TELA](https://github.com/jurajmajor/ltl3tela) v. 1.3.0
 * [LTL3BA](https://sourceforge.net/projects/ltl3ba/) v. 1.1.3
+* [Owl](https://owl.model.in.tum.de/) v. 18.06
 
 Known bugs
 ==========
 
-With standard configuration of Spot, LTL3TELA is unable to set more
-than 32 acceptance marks, therefore some larger formulae cannot be
-translated. To specify larger maximum number of acceptance marks,
-`./configure` Spot with `--enable-max-accsets=N`.
+With the standard configuration of Spot, LTL3TELA is unable to set more than 32 acceptance
+marks, therefore some larger formulae are only translated with Spot and not with standard
+LTL3TELA translation (even if it would, in theory, produce smaller automaton). To specify
+larger maximum number of acceptance marks, `./configure` Spot with `--enable-max-accsets=N`.
