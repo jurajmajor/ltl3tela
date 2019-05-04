@@ -1,3 +1,15 @@
+## [1.3.0] - 2019-05-04
+
+* It is now possible to generate deterministic automata with `-D1` flag.
+* The input formula is split to temporal formulae which are translated independently.
+* LTL3TELA now employs Spotela reduction method to reduce the state space of TGBA.
+* Spot is used to translate both formula and its negation.
+* An extended check of SLAA edge dominance has been implemented.
+* Minor optimization of translation of disjunction to SLAA has been added.
+* More complex automata comparison (for choosing the best one) has been implemented.
+* If >32 acceptance sets were used during the translation, we still use Spot to produce the result.
+* With `-x1`, LTL3TELA prints some statistics about chosen translation tool(s) to STDERR.
+
 ## [1.2.1] - 2018-11-13
 
 * Fixed segfault with -p1.
