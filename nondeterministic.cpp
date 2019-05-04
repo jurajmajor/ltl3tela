@@ -406,6 +406,11 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 				}
 			}
 
+			if (o_try_ltl2tgba_spotela & 2) {
+				auto nwa_spotela = spotela_simplify(nwa);
+				std::tie(nwa, stats) = compare_automata(nwa, nwa_spotela, stats, stats + "+spotela");
+			}
+
 			we_crashed = false;
 		} catch (std::runtime_error& e) {
 			std::string what(e.what());
@@ -424,11 +429,6 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 			// so that we won't be confused if we work with f in the future
 			f = simplify_formula(spot::formula::Not(f));
 		}
-	}
-
-	if (o_try_ltl2tgba_spotela & 2) {
-		auto nwa_spotela = spotela_simplify(nwa);
-		std::tie(nwa, stats) = compare_automata(nwa, nwa_spotela, stats, stats + "+spotela");
 	}
 
 	if (!exit_after_alternating) {
@@ -475,7 +475,7 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 
 			if (we_crashed) {
 				nwa = nwa_spot;
-				stats = "spot";
+				stats = stats_spot;
 			} else {
 				std::tie(nwa, stats) = compare_automata(nwa, nwa_spot, stats, stats_spot);
 			}
