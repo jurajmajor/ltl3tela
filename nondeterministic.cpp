@@ -472,7 +472,19 @@ std::pair<spot::twa_graph_ptr, std::string> build_product_nwa(spot::formula f, s
 
 	if (f.is(spot::op::And, spot::op::Or)) {
 		spot::twa_graph_ptr aut = nullptr;
+
+		std::vector<spot::formula> susp;
+		std::vector<spot::formula> rest;
 		for (auto g : f) {
+			if (is_suspendable(g)) {
+				susp.push_back(g);
+			} else {
+				rest.push_back(g);
+			}
+		}
+
+		// first translate rest, suspendable go last
+		for (auto g : rest) {
 			spot::twa_graph_ptr g_aut;
 			std::string g_stats;
 
@@ -482,17 +494,28 @@ std::pair<spot::twa_graph_ptr, std::string> build_product_nwa(spot::formula f, s
 
 			if (aut) {
 				if (f.is(spot::op::And)) {
-					if (is_suspendable(g)) {
-						aut = spot::product_susp(aut, g_aut);
-					} else {
-						aut = spot::product(aut, g_aut);
-					}
+					aut = spot::product(aut, g_aut);
 				} else {
-					if (is_suspendable(g)) {
-						aut = spot::product_or_susp(aut, g_aut);
-					} else {
-						aut = spot::product_or(aut, g_aut);
-					}
+					aut = spot::product_or(aut, g_aut);
+				}
+			} else {
+				aut = g_aut;
+			}
+		}
+
+		for (auto g : susp) {
+			spot::twa_graph_ptr g_aut;
+			std::string g_stats;
+
+			std::tie(g_aut, g_stats) = build_product_nwa(g, dict);
+
+			stats << g_stats;
+
+			if (aut) {
+				if (f.is(spot::op::And)) {
+					aut = spot::product_susp(aut, g_aut);
+				} else {
+					aut = spot::product_or_susp(aut, g_aut);
 				}
 			} else {
 				aut = g_aut;
