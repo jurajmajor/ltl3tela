@@ -47,7 +47,7 @@ following tools installed in `PATH` on your system.
 Known bugs
 ==========
 
-With standard configuration of Spot, LTL3TELA is unable to set more
-than 32 acceptance marks, therefore some larger formulae cannot be
-translated. To specify larger maximum number of acceptance marks,
-`./configure` Spot with `--enable-max-accsets=N`.
+With the standard configuration of Spot, LTL3TELA is unable to set more than 32 acceptance
+marks, therefore some larger formulae are only translated with Spot and not with standard
+LTL3TELA translation (even if it would, in theory, produce smaller automaton). To specify
+larger maximum number of acceptance marks, `./configure` Spot with `--enable-max-accsets=N`.
