@@ -426,39 +426,59 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 		}
 	}
 
+	if (o_try_ltl2tgba_spotela & 2) {
+		auto nwa_spotela = spotela_simplify(nwa);
+		std::tie(nwa, stats) = compare_automata(nwa, nwa_spotela, stats, stats + "+spotela");
+	}
+
 	if (!exit_after_alternating) {
 		if (o_try_ltl2tgba_spotela & 1) {
 			spot::twa_graph_ptr nwa_spot;
-			if (dict) {
-				spot::translator ltl2tgba(dict);
-				if (o_deterministic) {
-					ltl2tgba.set_pref(spot::postprocessor::Deterministic);
+			std::string stats_spot("spot");
+
+			for (unsigned neg = 0; neg <= o_try_negation; ++neg) {
+				auto spot_f = neg ? spot::formula::Not(orig_f) : orig_f;
+				spot::twa_graph_ptr nwa_spot_temp;
+
+				if (dict) {
+					spot::translator ltl2tgba(dict);
+					if (o_deterministic) {
+						ltl2tgba.set_pref(spot::postprocessor::Deterministic);
+					}
+					ltl2tgba.set_type(spot::postprocessor::Generic);
+					ltl2tgba.set_level(spot::postprocessor::High);
+					nwa_spot_temp = ltl2tgba.run(spot_f);
+				} else {
+					spot::translator ltl2tgba;
+					if (o_deterministic) {
+						ltl2tgba.set_pref(spot::postprocessor::Deterministic);
+					}
+					ltl2tgba.set_type(spot::postprocessor::Generic);
+					ltl2tgba.set_level(spot::postprocessor::High);
+					nwa_spot_temp = ltl2tgba.run(spot_f);
 				}
-				ltl2tgba.set_type(spot::postprocessor::Generic);
-				ltl2tgba.set_level(spot::postprocessor::High);
-				nwa_spot = ltl2tgba.run(orig_f);
-			} else {
-				spot::translator ltl2tgba;
-				if (o_deterministic) {
-					ltl2tgba.set_pref(spot::postprocessor::Deterministic);
+				nwa_spot_temp = try_postprocessing(nwa_spot_temp);
+
+				if (!neg) {
+					// assign the default Spot automaton
+					nwa_spot = nwa_spot_temp;
+				} else if (spot::is_universal(nwa_spot_temp)) {
+					nwa_spot_temp = spot::dualize(nwa_spot_temp);
+					std::tie(nwa_spot, stats_spot) = compare_automata(nwa_spot, nwa_spot_temp, stats_spot, "spotneg");
 				}
-				ltl2tgba.set_type(spot::postprocessor::Generic);
-				ltl2tgba.set_level(spot::postprocessor::High);
-				nwa_spot = ltl2tgba.run(orig_f);
 			}
-			nwa_spot = try_postprocessing(nwa_spot);
+
+			if (o_try_ltl2tgba_spotela & 2) {
+				auto nwa_spot_spotela = spotela_simplify(nwa_spot);
+				std::tie(nwa_spot, stats) = compare_automata(nwa_spot, nwa_spot_spotela, stats_spot, stats_spot + "+spotela");
+			}
 
 			if (we_crashed) {
 				nwa = nwa_spot;
 				stats = "spot";
 			} else {
-				std::tie(nwa, stats) = compare_automata(nwa, nwa_spot, stats, "spot");
+				std::tie(nwa, stats) = compare_automata(nwa, nwa_spot, stats, stats_spot);
 			}
-		}
-
-		if (o_try_ltl2tgba_spotela & 2) {
-			auto nwa_spotela = spotela_simplify(nwa);
-			std::tie(nwa, stats) = compare_automata(nwa, nwa_spotela, stats, stats + "+spotela");
 		}
 	}
 
