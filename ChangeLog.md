@@ -1,4 +1,4 @@
-## [1.3.0] - 2019-05-04
+## [2.0.0] - 2019-05-04
 
 * It is now possible to generate deterministic automata with `-D1` flag.
 * The input formula is split to temporal formulae which are translated independently.

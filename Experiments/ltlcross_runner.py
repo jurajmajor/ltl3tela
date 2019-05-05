@@ -578,7 +578,7 @@ class LtlcrossRunner(object):
         else:
             res = (self.exit_status == err_type).sum()
         if drop_zeros:
-            return res.iloc[res.nonzero()]
+            return res.iloc[res.to_numpy().nonzero()]
         return res
 
     def cross_compare(self,tools=None,props=['states','acc'],

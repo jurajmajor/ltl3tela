@@ -50,7 +50,7 @@ def highlight_by_level(df, high_fcn):
     lab = 0
     while lab < len(df):
         # How many rows do we have for the part
-        label_index = idx.labels[0][lab]
+        label_index = idx.codes[0][lab]
         level_length = len(df.loc[idx.levels[0][label_index]])
         
         label = idx.levels[0][label_index]
@@ -78,7 +78,7 @@ def fix_tool(t):
     if t == 'ltl2tgba':
         t = 'ltl2tgba\\tgba'
     if t.startswith('ltl'):
-        t = f'\\spottool{{{t}}}'
+        t = '\\spottool{{{}}}'.format(t)
     return t
 
 def fix_type(t,vertical=False,color=None):
@@ -129,9 +129,9 @@ def get_tabular_cols(df, color=True, first_col_centered=True):
     # name stored in levels[lev][labels[lev][col]]
     lab = 0
     i = 0
-    while lab < len(cols.labels[0]):
+    while lab < len(cols.codes[0]):
         # How many columns do we have for the current outermost-level column
-        label_index = cols.labels[0][lab]
+        label_index = cols.codes[0][lab]
         level_length = len(df[cols.levels[0][label_index]].columns)
         # color if even
         if i % 2 == 0:

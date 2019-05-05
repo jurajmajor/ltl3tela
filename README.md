@@ -40,7 +40,7 @@ following tools installed in `PATH` on your system.
 * [SPOT](https://spot.lrde.epita.fr/) v. 2.7.4 with Python bindings
 * [Pandas](http://pandas.pydata.org/) Python library v. 20.3+
 * [Jupyter](http://jupyter.org/) notebook v. 5.0+
-* [LTL3TELA](https://github.com/jurajmajor/ltl3tela) v. 1.3.0
+* [LTL3TELA](https://github.com/jurajmajor/ltl3tela) v. 2.0.0
 * [LTL3BA](https://sourceforge.net/projects/ltl3ba/) v. 1.1.3
 * [Owl](https://owl.model.in.tum.de/) v. 18.06
 
