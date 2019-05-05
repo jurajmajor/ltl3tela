@@ -32,9 +32,10 @@ def split_cols(res,delimiter='/',axis=1,names=None,repl_empty=True):
         tmp.index = new
     return tmp #tmp.sort_index(axis=axis,level=[0],sort_remaining=False)
 
-def high_min(data):
+def high_min(data, skip_zero=True):
     return ['\high ${:0.0f}$'.format(m) if 
-            m == data.min() else m for m in data]
+            m == data.min() and not (skip_zero and m == 0)
+            else m for m in data]
 
 def high_max(data):
     return ['\high ${:0.0f}$'.format(m) if 
