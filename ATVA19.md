@@ -1,5 +1,5 @@
-ATVA19 evaluation
-=================
+ATVA 2019 evaluation
+====================
 
 Please see the [Jupyter notebook](Experiments/Evaluation_ATVA19.ipynb) with all results,
 namely the commands to call the compared tools, procedure to generate the random formulae,
