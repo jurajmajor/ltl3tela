@@ -1,7 +1,7 @@
 ATVA19 evaluation
 =================
 
-Please see the [Jupyter notebook](Experiments/Evaluation_ATVA19.ipnyb) with all results.
+Please see the [Jupyter notebook](Experiments/Evaluation_ATVA19.ipynb) with all results.
 If the link doesn't work, please open it in 
 
 The following input data were used to evaluate the tools:
@@ -27,4 +27,4 @@ CSV files with the measured data are available:
 Moreover, we measured the performance of translators to deterministic automata in a way that
 the automata produced by Delag and Rabinizer 4 have been simplified using the Spot optimization
 procedures (using the `autfilt` tool) over the same sets of input data. The measured data can
-be found in [Evaluation_ATVA19_Autfilt](Experiments/Evaluation_ATVA19_Autfilt.ipnyb) notebook.
+be found in [Evaluation_ATVA19_Autfilt](Experiments/Evaluation_ATVA19_Autfilt.ipynb) notebook.
