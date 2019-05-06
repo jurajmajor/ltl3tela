@@ -2,7 +2,8 @@ ATVA19 evaluation
 =================
 
 Please see the [Jupyter notebook](Experiments/Evaluation_ATVA19.ipynb) with all results.
-If the link doesn't work, please open it in 
+If the link doesn't work, please open it in
+[NBViewer](https://nbviewer.jupyter.org/github/jurajmajor/ltl3tela/blob/master/Experiments/Evaluation_ATVA19.ipynb).
 
 The following input data were used to evaluate the tools:
 
