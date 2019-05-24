@@ -202,11 +202,11 @@ spot::twa_graph_ptr spotela_simplify(spot::twa_graph_ptr aut) {
 }
 
 bool implies_language(spot::twa_graph_ptr aut, unsigned state1, unsigned state2) {
-	// check L(A1) ⊆ L(A2): this holds iff L(A1) ∩ co-L(A2) = ∅
+	// check L(A1) ⊆ L(A2)
 	auto aut1 = create_aut_from_state(aut, state1);
-	auto coaut2 = spot::dualize(create_aut_from_state(aut, state2));
+	auto aut2 = create_aut_from_state(aut, state2);
 
-	return !aut1->intersects(coaut2);
+	return spot::contains(aut1, aut2);
 }
 
 maybe<edge_t> check_snd_pattern(spot::twa_graph_ptr aut, edge_t edge, bdd c_edge_cond, unsigned state1, unsigned state2) {
