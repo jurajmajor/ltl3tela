@@ -26,6 +26,7 @@
 #include <spot/graph/graph.hh>
 #include <spot/twa/acc.hh>
 #include <spot/twaalgos/cleanacc.hh>
+#include <spot/twaalgos/contains.hh>
 #include <spot/twaalgos/dualize.hh>
 #include <spot/twaalgos/postproc.hh>
 #include <spot/twaalgos/sccinfo.hh>
