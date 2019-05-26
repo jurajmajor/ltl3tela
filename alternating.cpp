@@ -20,6 +20,25 @@
 #include "utils.hpp"
 #include "alternating.hpp"
 
+unsigned get_max_u_disj_size(spot::formula f) {
+	if (f.is_boolean()) {
+		return 1;
+	}
+	unsigned max = 1;
+	if (f.is(spot::op::U) && f[0].is_boolean() && !f[1].is_boolean()) {
+		max = f_bar(f[1]).size();
+	}
+	for (auto g : f) {
+		auto mm = get_max_u_disj_size(g);
+		if (mm > max) {
+			max = mm;
+		}
+	}
+	return max;
+}
+
+unsigned max_u_disj_size;
+
 bool is_mergeable(SLAA* slaa, spot::formula f) {
 	if (!f.is(spot::op::U)) {
 		throw "Argument of is_mergeable is not an U-formula";
@@ -152,7 +171,7 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 				}
 			}
 
-			if (o_disj_merging && same_labels && loops_not_alternating) {
+			if (o_disj_merging && o_g_merge_level && same_labels && loops_not_alternating) {
 				auto& ac = slaa->spot_aut->acc();
 				// FIXME we don't have support for ignoring this yet
 				// now just create a Fin mark and don't add it anywhere
@@ -332,8 +351,25 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 			}
 		} else if (f.is(spot::op::U)) {
 			auto& ac = slaa->spot_aut->acc();
-			slaa->acc[f].fin = ac.add_set(); // create a new mark
-			slaa->acc[f].inf = -1U; // default value for Inf-mark, meaning the mark does not have a value
+			acc_mark m_fin, m_inf;
+
+			bool acc_empty = slaa->acc.empty();
+
+			if (o_g_merge_level) {
+				m_fin = slaa->acc[f].fin = ac.add_set();
+				m_inf = slaa->acc[f].inf = -1U; // default value for Inf-mark, meaning the mark does not have a value
+			} else {
+				if (acc_empty) {
+					auto _x = ac.add_set();
+					if (_x != 0) {
+						throw "Global Fin mark is expected to be 0.";
+					}
+					slaa->acc[f].fin = 0;
+					slaa->acc[f].inf = -1U;
+				}
+				m_fin = 0;
+				m_inf = -1U;
+			}
 
 			unsigned left = make_alternating_recursive(slaa, f[0]);
 			unsigned right = make_alternating_recursive(slaa, f[1]);
@@ -344,7 +380,7 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 					state_id,
 					spot::formula_to_bdd(f[0], slaa->spot_bdd_dict, slaa->spot_aut),
 					std::set<unsigned>({ state_id }),
-					std::set<unsigned>({ slaa->acc[f].fin })
+					std::set<unsigned>({ m_fin })
 				);
 
 				// if f is a disjunction of at least two subformulae, create marks for each of these
@@ -389,11 +425,22 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 					}
 
 					if (states_with_loop > 1) {
-						mark = ac.add_sets(f_dnf_size);
-						// now we have marks in range mark .. mark + f_dnf_size - 1
-						// each set of edges gets all but its number
-						for (acc_mark i = mark; i < mark + f_dnf_size; ++i) {
-							slaa->acc[f].fin_disj.insert(i);
+						if (o_g_merge_level) {
+							mark = ac.add_sets(f_dnf_size);
+						} else {
+							if (ac.num_sets() == 1) {
+								auto _x = ac.add_sets(max_u_disj_size);
+								if (_x != 1) {
+									throw "Disjunction Fin marks are expected to start at 1.";
+								}
+							}
+							mark = 1;
+						}
+
+						for (acc_mark i = mark; i < mark + (o_g_merge_level ? f_dnf_size : max_u_disj_size); ++i) {
+							if (acc_empty || o_g_merge_level) {
+								slaa->acc[f].fin_disj.insert(i);
+							}
 						}
 					}
 				}
@@ -444,7 +491,7 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 
 							auto new_edge_marks = edge->get_marks();
 							if (mark != -1U) {
-								for (unsigned i = mark; i < mark + f_dnf_size; ++i) {
+								for (unsigned i = mark; i < mark + (o_g_merge_level ? f_dnf_size : max_u_disj_size); ++i) {
 									if (i != m_mark) {
 										new_edge_marks.insert(i);
 									}
@@ -470,11 +517,18 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 
 				slaa->add_edge(state_id, right_edges);
 
+				acc_mark fin;
+				if (o_g_merge_level) {
+					fin = slaa->acc[f].fin;
+				} else {
+					fin = std::begin(slaa->acc)->second.fin;
+				}
+
 				for (auto& left_edge : left_edges) {
 					auto p = slaa->edge_product(left_edge, loop_id, true);
 					// the only mark is the new Fin
 					slaa->get_edge(p)->clear_marks();
-					slaa->get_edge(p)->add_mark(slaa->acc[f].fin);
+					slaa->get_edge(p)->add_mark(fin);
 					slaa->add_edge(state_id, p);
 				}
 			}
@@ -486,6 +540,8 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 
 SLAA* make_alternating(spot::formula f, spot::bdd_dict_ptr dict) {
 	SLAA* slaa = new SLAA(f, dict);
+
+	max_u_disj_size = get_max_u_disj_size(f);
 
 	if (o_single_init_state) {
 		std::set<unsigned> init_set = { make_alternating_recursive(slaa, f) };

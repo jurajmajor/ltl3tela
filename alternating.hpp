@@ -28,6 +28,8 @@
 #include <map>
 #include <set>
 
+unsigned get_max_u_disj_size(spot::formula f);
+
 // registers atomic proposition from a state formula
 void register_ap_from_boolean_formula(SLAA* slaa, spot::formula f);
 
