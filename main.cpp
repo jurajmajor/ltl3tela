@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
 			<< "\t-o [hoa|dot]\ttype of output\n"
 			<< "\t\thoa\tprint automaton in HOA format (default)\n"
 			<< "\t\tdot\tprint dot format\n"
-			<< "\t-O[0|1]\tdisjunction merging (default on)\n"
+			<< "\t-O[0|1]\tdisjunction merging (default off)\n"
 			<< "\t-p[1|2|3]\tphase of translation\n"
 			<< "\t\t1\tprint SLAA\n"
 			<< "\t\t2\tprint NA (default)\n"
