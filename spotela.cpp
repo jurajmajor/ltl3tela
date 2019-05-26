@@ -278,9 +278,8 @@ void add_edges(spot::twa_graph_ptr aut, state_info& si, unsigned new_state, std:
 	}
 
 	for (auto& edge : si.loops) {
-		auto cond = bdd_and(edge.cond, si.c_cond);
-		if (cond != bddfalse) {
-			aut->new_edge(new_state, new_state, cond, edge.acc | spot::acc_cond::mark_t(std::begin(acc), std::end(acc)));
+		if (edge.cond != bddfalse) {
+			aut->new_edge(new_state, new_state, edge.cond, edge.acc | spot::acc_cond::mark_t(std::begin(acc), std::end(acc)));
 		}
 	}
 }
