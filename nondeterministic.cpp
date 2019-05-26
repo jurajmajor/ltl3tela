@@ -470,7 +470,7 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 
 			if (o_try_ltl2tgba_spotela & 2) {
 				auto nwa_spot_spotela = spotela_simplify(nwa_spot);
-				std::tie(nwa_spot, stats) = compare_automata(nwa_spot, nwa_spot_spotela, stats_spot, stats_spot + "+spotela");
+				std::tie(nwa_spot, stats_spot) = compare_automata(nwa_spot, nwa_spot_spotela, stats_spot, stats_spot + "+spotela");
 			}
 
 			if (we_crashed) {
