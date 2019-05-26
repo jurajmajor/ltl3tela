@@ -45,7 +45,7 @@ extern unsigned o_mergeable_info;	// -m
 extern bool o_try_negation;			// -n
 extern bool o_simplify_formula;		// -s
 extern bool o_ac_filter_fin;		// -t
-extern bool o_stats;				// -x
+extern unsigned o_debug;			// -x
 extern bool o_spot_simulation;		// -u
 extern bool o_spot_scc_filter;		// -z
 

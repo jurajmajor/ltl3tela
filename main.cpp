@@ -38,7 +38,7 @@ bool o_try_negation;		// -n
 bool o_simplify_formula;	// -s
 bool o_ac_filter_fin;		// -t
 bool o_spot_simulation;		// -u
-bool o_stats;				// -x
+unsigned o_debug;			// -x
 bool o_spot_scc_filter;		// -z
 
 bool o_deterministic;		// -D
@@ -115,7 +115,11 @@ int main(int argc, char* argv[])
 			<< "\t-t[0|1]\timproved construction of acceptance condition (default on)\n"
 			<< "\t-u[0|1]\tsimulation of nondeterministic automaton (default on)\n"
 			<< "\t-v\tprint version and exit\n"
-			<< "\t-x[0|1]\t(for experiments only) statistics to STDERR (default off)\n"
+			<< "\t-x\t(for experiments only) special experiments-related options\n"
+			<< "\t\t0\toff (default)\n"
+			<< "\t\t1\tstatistics to STDERR\n"
+			<< "\t\t2\tuse only external translator, not LTL3TELA algorithm\n"
+			<< "\t\t3\tboth -x1 and -x2\n"
 			<< "\t-X[0|1]\ttranslate X phi as (X phi) --tt--> (phi) (default off)\n"
 			<< "\t-z[0|1]\tcall scc_filter on nondeterministic automaton (default on)\n";
 
@@ -140,7 +144,7 @@ int main(int argc, char* argv[])
 	o_simplify_formula = std::stoi(args["s"]);
 	o_ac_filter_fin = std::stoi(args["t"]);
 	o_spot_simulation = std::stoi(args["u"]);
-	o_stats = std::stoi(args["x"]);
+	o_debug = std::stoi(args["x"]);
 	o_spot_scc_filter = std::stoi(args["z"]);
 
 	o_deterministic = std::stoi(args["D"]);
@@ -157,6 +161,11 @@ int main(int argc, char* argv[])
 
 	// -p1 implies -l0
 	o_ltl_split = o_ltl_split && (print_phase & 2);
+
+	// -x2 implies -b1 (mind the bitwise operations)
+	if (o_debug & 2) {
+		o_try_ltl2tgba_spotela = o_try_ltl2tgba_spotela | 1;
+	}
 
 	spot::twa_graph_ptr nwa = nullptr;
 	SLAA* slaa = nullptr;
@@ -207,7 +216,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	if (o_stats) {
+	if (o_debug & 1) {
 		std::cerr << stats;
 	}
 

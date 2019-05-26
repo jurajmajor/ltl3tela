@@ -358,11 +358,12 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 
 	std::string stats("basic");
 	bool we_crashed = false;
+	bool use_ltl3tela_algorithm = !(o_debug & 2);
 
 	auto orig_f = f;
 	f = simplify_formula(f);
 
-	for (unsigned neg = 0; neg <= o_try_negation; ++neg) {
+	for (unsigned neg = 0; neg <= o_try_negation && use_ltl3tela_algorithm; ++neg) {
 		// neg means we try to negate the formula and complement
 		// the resulting automaton, if it's deterministic
 		// we then choose the smaller of the two automata
@@ -473,7 +474,7 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 				std::tie(nwa_spot, stats_spot) = compare_automata(nwa_spot, nwa_spot_spotela, stats_spot, stats_spot + "+spotela");
 			}
 
-			if (we_crashed) {
+			if (we_crashed || !use_ltl3tela_algorithm) {
 				nwa = nwa_spot;
 				stats = stats_spot;
 			} else {
