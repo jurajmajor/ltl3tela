@@ -155,10 +155,8 @@ int main(int argc, char* argv[])
 
 	unsigned int print_phase = std::stoi(args["p"]);
 
-	if ((print_phase & 1) && o_ltl_split) {
-		std::cerr << "Output of alternating automaton is only supported with -l0.\n";
-		return 2;
-	}
+	// -p1 implies -l0
+	o_ltl_split = o_ltl_split && (print_phase & 2);
 
 	spot::twa_graph_ptr nwa = nullptr;
 	SLAA* slaa = nullptr;
