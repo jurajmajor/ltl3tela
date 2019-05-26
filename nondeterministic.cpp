@@ -363,7 +363,7 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 	auto orig_f = f;
 	f = simplify_formula(f);
 
-	for (unsigned neg = 0; neg <= o_try_negation && use_ltl3tela_algorithm; ++neg) {
+	for (unsigned neg = 0; neg <= (o_try_negation && !exit_after_alternating) && use_ltl3tela_algorithm; ++neg) {
 		// neg means we try to negate the formula and complement
 		// the resulting automaton, if it's deterministic
 		// we then choose the smaller of the two automata
