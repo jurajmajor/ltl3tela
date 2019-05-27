@@ -1,3 +1,9 @@
+## [2.1.0] - 2019-05-27
+
+* LTL3TELA now uses substantially less acceptance marks with `-G0`.
+* Two bugs in pattern-based reduction (Spotela) which could cause production of incorrect automata or an unhandled exception have been fixed.
+* Multiple minor bugs are now fixed.
+
 ## [2.0.0] - 2019-05-04
 
 * It is now possible to generate deterministic automata with `-D1` flag.
