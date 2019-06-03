@@ -338,15 +338,7 @@ spot::twa_graph_ptr make_nondeterministic(SLAA* slaa) {
 		}
 	}
 
-	//aut->merge_edges(); we do this for nha
-	if (o_spot_scc_filter || o_spot_simulation) {
-		aut = spot::scc_filter(aut);
-	} else {
-		// older versions of spot remove the state names after scc_filter calls
-		// hence we add a possibility not to call scc_filter
-		aut->purge_dead_states();
-	}
-
+	aut = spot::scc_filter(aut);
 	aut = try_postprocessing(aut);
 
 	return aut;
@@ -381,22 +373,14 @@ std::tuple<spot::twa_graph_ptr, SLAA*, std::string> build_best_nwa(spot::formula
 				std::exit(0);
 			}
 
-			bool slaa_filtered = o_spot_scc_filter || !print_alternating;
-			if (slaa_filtered) {
-				slaa->remove_unreachable_states();
-				slaa->remove_unnecessary_marks();
-			}
+			slaa->remove_unreachable_states();
+			slaa->remove_unnecessary_marks();
 
 			if (print_alternating && !neg) {
 				slaa_out = slaa;
 			}
 
 			if (!exit_after_alternating) {
-				if (!slaa_filtered) {
-					slaa->remove_unreachable_states();
-					slaa->remove_unnecessary_marks();
-				}
-
 				auto nwa_temp = make_nondeterministic(slaa);
 				if (!neg || we_crashed) {
 					// always assign the default value, nothing to compare
@@ -559,17 +543,15 @@ std::pair<spot::twa_graph_ptr, std::string> build_product_nwa(spot::formula f, s
 }
 
 spot::twa_graph_ptr try_postprocessing(spot::twa_graph_ptr aut) {
-	if (o_spot_simulation) {
-		spot::postprocessor pp;
-		pp.set_type(spot::postprocessor::Generic);
-		if (o_deterministic) {
-			pp.set_pref(spot::postprocessor::Deterministic);
-		}
-		auto p_aut = pp.run(aut);
-		spot::cleanup_acceptance_here(p_aut);
-
-		aut = compare_automata(p_aut, aut).first;
+	spot::postprocessor pp;
+	pp.set_type(spot::postprocessor::Generic);
+	if (o_deterministic) {
+		pp.set_pref(spot::postprocessor::Deterministic);
 	}
+	auto p_aut = pp.run(aut);
+	spot::cleanup_acceptance_here(p_aut);
+
+	aut = compare_automata(p_aut, aut).first;
 
 	return aut;
 }

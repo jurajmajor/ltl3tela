@@ -37,9 +37,7 @@ unsigned o_mergeable_info;	// -m
 bool o_try_negation;		// -n
 bool o_simplify_formula;	// -s
 bool o_ac_filter_fin;		// -t
-bool o_spot_simulation;		// -u
 unsigned o_debug;			// -x
-bool o_spot_scc_filter;		// -z
 
 bool o_deterministic;		// -D
 
@@ -71,8 +69,8 @@ int main(int argc, char* argv[])
 			<< "available flags:\n"
 			<< "\t-a[0|2|3]\tact like\n"
 			<< "\t\t0\tdo not simulate anything (default)\n"
-			<< "\t\t2\tltl2ba (like -d0 -u0 -n0 -e1)\n"
-			<< "\t\t3\tltl3ba (like -u0 -n0 -i1 -X1)\n"
+			<< "\t\t2\tltl2ba (like -d0 -n0 -e1)\n"
+			<< "\t\t3\tltl3ba (like -n0 -i1 -X1)\n"
 			<< "\t-b[0|1|2|3]\tproduce TGBA if smaller\n"
 			<< "\t\t0\tno action\n"
 			<< "\t\t1\ttry ltl2tgba\n"
@@ -113,15 +111,13 @@ int main(int argc, char* argv[])
 			<< "\t\t3\tprint both\n"
 			<< "\t-s[0|1]\tspot's formula simplifications (default on)\n"
 			<< "\t-t[0|1]\timproved construction of acceptance condition (default on)\n"
-			<< "\t-u[0|1]\tsimulation of nondeterministic automaton (default on)\n"
 			<< "\t-v\tprint version and exit\n"
 			<< "\t-x\t(for experiments only) special experiments-related options\n"
 			<< "\t\t0\toff (default)\n"
 			<< "\t\t1\tstatistics to STDERR\n"
 			<< "\t\t2\tuse only external translator, not LTL3TELA algorithm\n"
 			<< "\t\t3\tboth -x1 and -x2\n"
-			<< "\t-X[0|1]\ttranslate X phi as (X phi) --tt--> (phi) (default off)\n"
-			<< "\t-z[0|1]\tcall scc_filter on nondeterministic automaton (default on)\n";
+			<< "\t-X[0|1]\ttranslate X phi as (X phi) --tt--> (phi) (default off)\n";
 
 		return invalid_run;
 	}
@@ -143,9 +139,7 @@ int main(int argc, char* argv[])
 	o_try_negation = std::stoi(args["n"]);
 	o_simplify_formula = std::stoi(args["s"]);
 	o_ac_filter_fin = std::stoi(args["t"]);
-	o_spot_simulation = std::stoi(args["u"]);
 	o_debug = std::stoi(args["x"]);
-	o_spot_scc_filter = std::stoi(args["z"]);
 
 	o_deterministic = std::stoi(args["D"]);
 
