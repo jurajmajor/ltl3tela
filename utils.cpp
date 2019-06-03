@@ -82,6 +82,7 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 		{"x", { "0", "1", "2", "3" }},
 		{"X", { "0", "1" }},
 	};
+	std::set<std::string> args_without_values = { "h", "v" };
 
 	for (int i = 1; i < argc; ++i) {
 		if (last_arg_name.empty()) {
@@ -95,7 +96,7 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 				}
 
 				// pad flags with no value
-				if (last_arg_name == "h" || last_arg_name == "v") {
+				if (args_without_values.find(last_arg_name) != std::end(args_without_values)) {
 					last_arg_name += "1";
 				}
 
@@ -116,6 +117,16 @@ std::map<std::string, std::string> parse_arguments(int argc, char * argv[]) {
 
 	if (!last_arg_name.empty()) {
 		result.clear();
+	}
+
+	for (auto& r : result) {
+		if (allowed_values.count(r.first) == 0
+			&& args_without_values.find(r.first) == std::end(args_without_values)
+			&& r.first != "f") {
+			// flag not supported
+			result.clear();
+			break;
+		}
 	}
 
 	// simulation of LTL2BA means default values -d0 -X0 -n0
