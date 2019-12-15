@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 			<< "\t-d\tmore deterministic SLAA construction\n"
 			<< "\t\t0\tno optimization\n"
 			<< "\t\t1\tclassical transition dominance\n"
-			<< "\t\t0\textended transition dominance (default)\n"
+			<< "\t\t2\textended transition dominance (default)\n"
 			<< "\t-D[0|1]\tproduce deterministic NA\n"
 			<< "\t-e[0|1|2]\tequivalence check on NA\n"
 			<< "\t\t0\tno check\n"
