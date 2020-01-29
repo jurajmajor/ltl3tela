@@ -37,6 +37,7 @@
 #include <spot/twaalgos/isdet.hh>
 
 extern unsigned o_try_ltl2tgba_spotela;	// -b
+extern unsigned o_slaa_trans_red;	// -c
 extern bool o_single_init_state;	// -i
 extern unsigned o_slaa_determ;		// -d
 extern unsigned o_eq_level;			// -e

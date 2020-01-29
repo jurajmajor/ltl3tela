@@ -29,6 +29,7 @@
 #include "spotela.hpp"
 
 unsigned o_try_ltl2tgba_spotela;	// -b
+unsigned o_slaa_trans_red;	// -c
 bool o_single_init_state;	// -i
 unsigned o_slaa_determ;		// -d
 unsigned o_eq_level;		// -e
@@ -76,6 +77,11 @@ int main(int argc, char* argv[])
 			<< "\t\t1\ttry ltl2tgba\n"
 			<< "\t\t2\ttry SPOTELA\n"
 			<< "\t\t3\ttry ltl2tgba+SPOTELA (default)\n"
+			<< "\t-c[0|1|2|3]\tSLAA transition reduction\n"
+			<< "\t\t0\tno reductions\n"
+			<< "\t\t1\ton U-merging\n"
+			<< "\t\t2\ton G-merging\n"
+			<< "\t\t3\ton both U- and G-merging (default)\n"
 			<< "\t-d\tmore deterministic SLAA construction\n"
 			<< "\t\t0\tno optimization\n"
 			<< "\t\t1\tclassical transition dominance\n"
@@ -131,6 +137,7 @@ int main(int argc, char* argv[])
 	}
 
 	o_try_ltl2tgba_spotela = std::stoi(args["b"]);
+	o_slaa_trans_red = std::stoi(args["c"]);
 	o_single_init_state = std::stoi(args["i"]);
 	o_slaa_determ = std::stoi(args["d"]);
 	o_eq_level = std::stoi(args["e"]);

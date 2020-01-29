@@ -248,6 +248,7 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 			auto f1_dnf = f_bar(f[1]);
 			if (o_g_merge_level > 0 && f[0].is_ff() && f1_dnf.size() == 1 && (o_g_merge_level == 2 || f1_dnf.begin()->size() == 1)) {
 				// we have G(φ_1 & ... & φ_n) for temporal formulae φ_i
+				slaa->register_dom_states(state_id, right, 2);
 
 				auto f1_conjuncts = *(f1_dnf.begin());
 
@@ -255,6 +256,7 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 
 				for (auto& phi : f1_conjuncts) {
 					unsigned phi_state = make_alternating_recursive(slaa, phi);
+					slaa->register_dom_states(state_id, phi_state, 2);
 					std::set<unsigned> phi_edges;
 
 					if (phi.is(spot::op::U)) {
@@ -382,6 +384,7 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 					std::set<unsigned>({ state_id }),
 					std::set<unsigned>({ m_fin })
 				);
+				slaa->register_dom_states(right, state_id, 1);
 
 				// if f is a disjunction of at least two subformulae, create marks for each of these
 				auto f_dnf = f_bar(f[1]);
@@ -395,6 +398,7 @@ unsigned make_alternating_recursive(SLAA* slaa, spot::formula f) {
 							slaa,
 							spot::formula::And(std::vector<spot::formula>(m.begin(), m.end()))
 						);
+						slaa->register_dom_states(product_state, state_id, 1);
 						auto product_edges = slaa->get_state_edges(product_state);
 						std::set<unsigned> m_state_ids;
 						for (auto& m_formula : m) {

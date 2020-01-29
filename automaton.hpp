@@ -166,6 +166,7 @@ public:
 class SLAA : public Automaton<spot::formula> {
 protected:
 	spot::formula phi;
+	std::map<unsigned, std::set<unsigned>> dom_states; // state key dominates all its values
 
 public:
 	// each U-subformula has its own acceptance condition
@@ -193,6 +194,15 @@ public:
 	// acceptance formula of each Until state
 	std::map<spot::formula, acc_phi> acc;
 
+	// creates an edge with given source state, labels and target set
+	void add_edge(unsigned from, bdd label, std::set<unsigned> to, std::set<acc_mark> marks = std::set<acc_mark>());
+
+	// copies the given edge to the source `from'
+	void add_edge(unsigned from, unsigned edge_id);
+
+	// copies the given edges to the source `from'
+	void add_edge(unsigned from, std::set<unsigned> edge_ids);
+
 	// sets the Spot acceptance condition from acc
 	void build_acc();
 
@@ -214,6 +224,9 @@ public:
 
 	// postprocessing: remove dominated transition w.r.t. acceptance condition
 	void apply_extended_domination();
+
+	// register a pair of dominating and dominated states
+	void register_dom_states(unsigned strong, unsigned weak, unsigned option_level);
 
 	// prints the automaton in HOA format
 	void print_hoaf();

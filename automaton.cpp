@@ -488,6 +488,29 @@ template<typename T> void Automaton<T>::remove_unreachable_states() {
 	state_edges = new_state_edges_table;
 }
 
+void SLAA::add_edge(unsigned from, bdd label, std::set<unsigned> to, std::set<acc_mark> marks) {
+	std::set<unsigned> to_(to);
+	for (auto& kv : dom_states) {
+		if (to_.find(kv.first) != std::end(to_)) {
+			for (auto& s : kv.second) {
+				to_.erase(s);
+			}
+		}
+	}
+	Automaton<spot::formula>::add_edge(from, label, to_, marks);
+}
+
+void SLAA::add_edge(unsigned from, unsigned edge_id) {
+	auto orig = edges[edge_id];
+	add_edge(from, orig->get_label(), orig->get_targets(), orig->get_marks());
+}
+
+void SLAA::add_edge(unsigned from, std::set<unsigned> edge_ids) {
+	for (auto& edge_id : edge_ids) {
+		add_edge(from, edge_id);
+	}
+}
+
 // removes all marks on non-loops
 void SLAA::remove_unnecessary_marks() {
 	for (unsigned state_id = 0, states_count = states.size(); state_id < states_count; ++state_id) {
@@ -655,6 +678,12 @@ SLAA::ac_representation SLAA::mark_transformation(std::map<acc_mark, unsigned>& 
 	}
 
 	return acr;
+}
+
+void SLAA::register_dom_states(unsigned strong, unsigned weak, unsigned option_level) {
+	if (o_slaa_trans_red & option_level) {
+		dom_states[strong].insert(weak);
+	}
 }
 
 void SLAA::print_hoaf() {
