@@ -48,7 +48,7 @@ for pattern in patterns:
 
         stat_file = f"{data_dir}/{pattern}.{i:02d}.csv"
 
-        tool_ids = ' '.join(tools_alive.items())
+        tool_ids = ' '.join(tools_alive.keys())
         print(f"{pattern}({i}) - {tool_ids}")
 
         ! genltl {gen_cmd} | ltldo {do_cmd} > {stat_file} 2> /dev/null
