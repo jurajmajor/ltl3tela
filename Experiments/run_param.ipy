@@ -1,0 +1,61 @@
+# -*- coding: utf-8 -*-
+# from ltlcross_runner import LtlcrossRunner, param_runner
+# from tools_hier import get_tools
+from datetime import datetime
+import os
+import sys
+
+os.environ['SPOT_HOA_TOLERANT'] = 'TRUE'
+
+patterns = ['and-f', 'and-fg', 'and-gf', 'ccj-alpha', 'ccj-beta', 'ccj-beta-prime', 'fxg-or', 'gf-equiv', 'gf-equiv-xn', 'gf-implies', 'gf-implies-xn', 'gh-q',
+    'gh-r', 'go-theta', 'gxf-and', 'kr-n', 'kr-nlogn', 'kv-psi', 'ms-example', 'ms-phi-h', 'ms-phi-r', 'ms-phi-s', 'or-fg', 'or-g', 'or-gf', 'pps-arbiter-standard',
+    'pps-arbiter-strict', 'r-left', 'r-right', 'rv-counter', 'rv-counter-carry', 'rv-counter-carry-linear', 'rv-counter-linear', 'sejk-f', 'sejk-j', 'sejk-k',
+    'sejk-patterns', 'tv-f1', 'tv-f2', 'tv-g1', 'tv-g2', 'tv-uu', 'u-left', 'u-right']
+patterns_double_param = ['ms-example', 'sejk-f']
+patterns_max_param = {
+    'sejk-patterns': 3
+}
+
+if len(sys.argv) > 1:
+    patterns = list(filter(lambda p: p in patterns, sys.argv[1:]))
+
+tools = {
+    "ltl3ba": "ltldo ltl3ba\\ -H1 -f %f > %O",
+    "basic": "ltl3tela -p1 -c0 -d1 -F0 -G0 -i1 -X1 -f %f > %O",
+    "fmerg": "ltl3tela -p1 -c0 -d1 -G0 -i1 -X1 -f %f > %O",
+    "fgmerg": "ltl3tela -p1 -d1 -i1 -X1 -c0 -f %f > %O",
+    "fgmerg_opt": "ltl3tela -p1 -i1 -X1 -f %f > %O"
+}
+
+data_dir = 'x_data_param'
+timeout = '5'
+max_i = 64 # pokud preleze 100, zmen nize :02d na :03d
+csv_tool_index = 2 # zmen, pokud menis format statistik
+
+for pattern in patterns:
+    i = 1
+    tools_alive = tools
+
+    while tools_alive and i <= max_i and (pattern not in patterns_max_param or i <= patterns_max_param[pattern]):
+        gen_cmd = f"--{pattern}="
+        if pattern in patterns_double_param:
+            gen_cmd += f"{i},{i}"
+        else:
+            gen_cmd += str(i)
+
+        do_cmd = f" -T{timeout} --stats='{pattern},{i},%T,%s,%e,%a,%r,%d,%u' " # kdyz menim toto, zmen csv_tool_index
+        do_cmd += ' '.join([ f"'{{{toolid}}}{toolcmd}'" for (toolid, toolcmd) in tools_alive.items() ])
+
+        stat_file = f"{data_dir}/{pattern}.{i:02d}.csv"
+
+        tool_ids = ' '.join(tools_alive.items())
+        print(f"{pattern}({i}) - {tool_ids}")
+
+        ! genltl {gen_cmd} | ltldo {do_cmd} > {stat_file} 2> /dev/null
+
+        fd = open(stat_file, 'r')
+        lines = fd.readlines()
+        tools_alive = { tool: tools[tool] for tool in list(map(lambda ln: ln.split(',')[csv_tool_index], lines)) }
+        fd.close()
+
+        i += 1
