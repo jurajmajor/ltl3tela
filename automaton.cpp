@@ -108,7 +108,7 @@ template<typename T> void Automaton<T>::add_edge(unsigned from, bdd label, std::
 			auto e_other = get_edge(*e_other_it);
 
 			int dom_level;
-			if (spot_id_to_slaa_set == nullptr) {
+			if constexpr (!std::is_same<T, unsigned>::value) {
 				dom_level = e_this->dominates(e_other, get_inf_marks());
 			} else {
 				dom_level = e_this->dominates(e_other,
@@ -150,7 +150,7 @@ template<typename T> void Automaton<T>::add_edge(unsigned from, bdd label, std::
 		for (auto& e_other_id : state_edges[from]) {
 			auto e_other = get_edge(e_other_id);
 			int dom_level;
-			if (spot_id_to_slaa_set == nullptr) {
+			if constexpr (!std::is_same<T, unsigned>::value) {
 				dom_level = e_other->dominates(e_this, get_inf_marks());
 			} else {
 				dom_level = e_other->dominates(e_this,
